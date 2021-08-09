@@ -1,0 +1,29 @@
+BasedOnStyle: Microsoft
+AlignAfterOpenBracket: Align
+# Requires clang-format 12
+AlignConsecutiveMacros: AcrossEmptyLinesAndComments
+AlignEscapedNewlinesLeft: true
+AllowShortFunctionsOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: false
+ColumnLimit: 120
+IndentCaseLabels: false
+IndentCaseBlocks: true
+IndentWidth: 4
+Language: Cpp
+PointerAlignment: Left
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+Standard: Cpp11
+TabWidth: 4
+UseTab: Never
+FixNamespaceComments: true
+NamespaceIndentation: All
+BreakBeforeBraces: Allman
+BreakConstructorInitializers: BeforeComma
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ForEachMacros: [TEST_CLASS, TEST_METHOD, TEST_CLASS_INITIALIZE, TEST_CLASS_CLEANUP, TEST_METHOD_INITIALIZE, TEST_METHOD_CLEANUP, TEST_MODULE_INITIALIZE, TEST_MODULE_CLEANUP]

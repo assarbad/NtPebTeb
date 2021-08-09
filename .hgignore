@@ -1,0 +1,8 @@
+syntax: glob
+.vs/
+.git/
+bin/
+obj/
+hgid.h
+**.user
+TestResults/

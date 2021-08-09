@@ -1,0 +1,7 @@
+.vs/
+.hg/
+bin/
+obj/
+hgid.h
+**.user
+TestResults/
