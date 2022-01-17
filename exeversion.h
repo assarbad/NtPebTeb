@@ -54,7 +54,7 @@
 #define TEXT_FILEDESC      Small program to investigate the PEB and TEB // component description
 #define TEXT_COMPANY       Oliver Schneider(assarbad.net)           // company
 #define TEXT_MODULE        NtPebTeb                                 // module name
-#define TEXT_COPYRIGHT     Copyright \xA9 EXE_YEAR TEXT_AUTHOR      // copyright information
+#define TEXT_COPYRIGHT     Copyright \x00a9 EXE_YEAR TEXT_AUTHOR    // copyright information
 #define TEXT_INTERNALNAME  NtPebTeb.exe
 
 #define _ANSISTRING(text) #text

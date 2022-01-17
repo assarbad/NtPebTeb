@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Google Test">
+      <UniqueIdentifier>{94afcd03-38bf-4393-b3d6-4c649dd6dcab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Google Test\Header FIles">
+      <UniqueIdentifier>{16656b4a-4c12-4eea-b79a-a67f0d0bbbd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Google Test\Source Files">
+      <UniqueIdentifier>{7232b266-a047-4556-bfc2-3703e2694d59}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)googletest\src\gtest_main.cc">
+      <Filter>Google Test\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)googletest\src\gtest-all.cc">
+      <Filter>Google Test\Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest.h">
+      <Filter>Google Test\Header FIles</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest_pred_impl.h">
+      <Filter>Google Test\Header FIles</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest_prod.h">
+      <Filter>Google Test\Header FIles</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-death-test.h">
+      <Filter>Google Test\Header FIles</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-matchers.h">
+      <Filter>Google Test\Header FIles</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-message.h">
+      <Filter>Google Test\Header FIles</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-param-test.h">
+      <Filter>Google Test\Header FIles</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-printers.h">
+      <Filter>Google Test\Header FIles</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-spi.h">
+      <Filter>Google Test\Header FIles</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-test-part.h">
+      <Filter>Google Test\Header FIles</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-typed-test.h">
+      <Filter>Google Test\Header FIles</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)googletest\src\gtest-internal-inl.h">
+      <Filter>Google Test\Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

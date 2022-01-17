@@ -6,3 +6,4 @@ obj/
 hgid.h
 **.user
 TestResults/
+**.bak

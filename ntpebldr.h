@@ -26,7 +26,7 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
-#define __NTPEBLDR_H_VER__ 2021080900
+#define __NTPEBLDR_H_VER__ 2022011723
 #if (defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP)
 #pragma once
 #endif // Check for "#pragma once" support
@@ -58,6 +58,8 @@ namespace NT
     ULONG const& MajorVersion = *((ULONG*)(IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA + 0x026c));
     ULONG const& MinorVersion = *((ULONG*)(IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA + 0x0270));
 #endif
+
+    using byte = unsigned char;
 
     typedef struct _LDR_DATA_TABLE_ENTRY
     {
@@ -474,6 +476,68 @@ namespace NT
 
     namespace predefined_helpers
     {
+        namespace by_trait
+        {
+            typedef struct _MapByTrait
+            {
+                NTSTATUS Status;
+                PVOID Address;
+                PVOID DllBase;
+                ULONG SizeOfImage;
+            } MapByTrait;
+
+            STATIC_INLINE NTSTATUS CALLBACK MapTraitPredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx, MapByTrait& data)
+            {
+                if (ldrctx.DllBase && ldrctx.SizeOfImage && (data.Address || data.DllBase))
+                {
+                    if ((data.DllBase) && (ldrctx.DllBase == data.DllBase))
+                    {
+                        if (!data.Address) // No address to look for given?
+                        {
+                            data.SizeOfImage = ldrctx.SizeOfImage;
+                            return data.Status = STATUS_SUCCESS; // Found it!
+                        }                                        // fall through into the other check
+                    }
+                    if (data.Address)
+                    {
+                        if (data.DllBase &&
+                            (ldrctx.DllBase != data.DllBase)) // If we were passed a module, does it match?
+                        {
+                            return STATUS_NOT_FOUND; // Nope, so return failure early (will proceed to next ldr entry)
+                        }
+                        auto const* needle = (byte*)data.Address;
+                        auto const* haystack_start = (byte*)ldrctx.DllBase;
+                        auto const* haystack_end = haystack_start + ldrctx.SizeOfImage;
+                        if ((needle >= haystack_start) && (needle <= haystack_end))
+                        {
+                            data.DllBase = ldrctx.DllBase;
+                            data.SizeOfImage = ldrctx.SizeOfImage;
+                            return data.Status = STATUS_SUCCESS;
+                        }
+                    }
+                }
+                return data.Status = STATUS_NOT_FOUND;
+            }
+
+            STATIC_INLINE HMODULE GetModHandleByAddress(PVOID Address)
+            {
+                MapByTrait context = {STATUS_UNSUCCESSFUL, Address, nullptr, 0};
+                NTSTATUS Status = IteratePebLdrDataTable<MapByTrait>(MapTraitPredicate, context);
+                if (NT_SUCCESS(Status))
+                {
+                    return (HMODULE)context.DllBase;
+                }
+                return nullptr;
+            }
+
+            STATIC_INLINE MapByTrait GetModTraits(HMODULE hMod)
+            {
+                MapByTrait context = {STATUS_UNSUCCESSFUL, nullptr, hMod, 0};
+                (void)IteratePebLdrDataTable<MapByTrait>(MapTraitPredicate, context);
+                return context;
+            }
+        } // namespace by_trait
+
         namespace by_string
         {
             typedef struct _MapByUnicodeString
@@ -525,7 +589,42 @@ namespace NT
                 return nullptr;
             }
         } // namespace by_string
-    }     // namespace predefined_helpers
+
+        template <typename T> constexpr T const* checked_cast(byte const* start, byte const* beyond)
+        {
+            if ((beyond <= start) || (start + sizeof(T) >= beyond))
+            {
+                return nullptr;
+            }
+            return reinterpret_cast<T const*>(start);
+        }
+
+        // Default to the 64-bit struct, as it is the bigger one
+        // NB: takes a pre-populated MapByTrait struct
+        STATIC_INLINE constexpr IMAGE_NT_HEADERS64 const* GetImageNtHeaders(by_trait::MapByTrait const& modtraits)
+        {
+            using byte = unsigned char;
+            if (!NT_SUCCESS(modtraits.Status))
+            {
+                return nullptr;
+            }
+            byte const* mod = (byte*)modtraits.DllBase;
+            byte const* const beyond = mod + modtraits.SizeOfImage;
+            auto const* doshdr = checked_cast<IMAGE_DOS_HEADER>(mod, beyond);
+            if (!doshdr || (IMAGE_DOS_SIGNATURE != doshdr->e_magic))
+            {
+                return nullptr;
+            }
+            auto const* nthdrs = checked_cast<IMAGE_NT_HEADERS64>(mod + doshdr->e_lfanew, beyond);
+            if (!nthdrs || (IMAGE_NT_SIGNATURE != nthdrs->Signature))
+            {
+                return nullptr;
+            }
+            return nthdrs;
+        }
+    } // namespace predefined_helpers
+    using predefined_helpers::by_string::MapByUnicodeString;
+    using predefined_helpers::by_trait::MapByTrait;
 
     STATIC_INLINE HMODULE GetModHandleByBaseName(UNICODE_STRING const& DllName)
     {
@@ -552,7 +651,9 @@ namespace NT
         return hMod;
     }
 
-#if 0 // unreliable in managed processes, needs to be reviewed thoroughly (FIXME/TODO)
+// unreliable in managed processes (mscoree takes its place when run from VSUnit), needs to be reviewed thoroughly
+// (FIXME/TODO)
+#if 0
     STATIC_INLINE HMODULE GetKernel32()
     {
         constexpr PebLdrOrder const order = PebLdrOrder::memory;
@@ -560,7 +661,15 @@ namespace NT
         auto const* ldrentry = GetLdrDataTableEntry(head->Flink->Flink, order);
         return (HMODULE)ldrentry->DllBase;
     }
-#endif // 0 // unreliable in managed processes, needs to be reviewed thoroughly (FIXME/TODO)
+#endif // 0
+
+    STATIC_INLINE HMODULE GetCurrentModule()
+    {
+        constexpr PebLdrOrder const order = PebLdrOrder::memory;
+        auto const* head = GetPebLdrListHead(order);
+        auto const* ldrentry = GetLdrDataTableEntry(head, order);
+        return (HMODULE)ldrentry->DllBase;
+    }
 
     STATIC_INLINE HMODULE GetNtDll()
     {
@@ -572,6 +681,26 @@ namespace NT
 
     STATIC_INLINE FARPROC GetProcAddress(HMODULE hMod, LPCSTR FuncName)
     {
+        using namespace predefined_helpers;
+        auto const traits = by_trait::GetModTraits(hMod);
+        auto const* nthdrs = GetImageNtHeaders(traits);
+        if (!nthdrs)
+        {
+            return nullptr;
+        }
+
+        IMAGE_NT_HEADERS32 const* nthdrs32 = nullptr;
+        switch (nthdrs->FileHeader.Machine)
+        {
+        case IMAGE_FILE_MACHINE_I386:
+            nthdrs32 = (IMAGE_NT_HEADERS32*)nthdrs;
+            break;
+        case IMAGE_FILE_MACHINE_AMD64:
+            break;
+        default:
+            return nullptr;
+        }
+
         if (IS_INTRESOURCE(FuncName))
         {
             // By ordinal

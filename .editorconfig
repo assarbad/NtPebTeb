@@ -5,16 +5,32 @@ root = true
 end_of_line = lf
 insert_final_newline = true
 
-[*.{cpp,h,hpp}]
-end_of_line = crlf
+[*.{cpp,h,hpp,rc}]
+charset = utf-8
+end_of_line = lf
 indent_style = space
 indent_size = 4
+trim_trailing_whitespace = true
 
-[*.{cmd,lua,rst}]
+[*.cmd]
 end_of_line = crlf
 indent_style = space
 indent_size = 4
+trim_trailing_whitespace = true
+
+[*.lua]
+end_of_line = lf
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.{rst,md}]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = false
 
 [*.{props,xml}]
-end_of_line = crlf
+end_of_line = lf
 indent_style = space
