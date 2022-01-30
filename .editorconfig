@@ -31,6 +31,12 @@ indent_style = space
 indent_size = 4
 trim_trailing_whitespace = false
 
-[*.{props,xml}]
+[*.xml]
 end_of_line = lf
 indent_style = space
+
+[*.{props,vcxproj,vcxproj.filters}]
+charset = utf-8
+end_of_line = crlf
+indent_style = space
+indent_size = 4

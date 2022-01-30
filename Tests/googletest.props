@@ -28,7 +28,6 @@
     <ClInclude Include="$(ProjectDir)googletest\src\gtest-internal-inl.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(ProjectDir)googletest\src\gtest_main.cc" />
     <ClCompile Include="$(ProjectDir)googletest\src\gtest-all.cc" />
   </ItemGroup>
 </Project>

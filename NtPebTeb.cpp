@@ -63,6 +63,16 @@ int _tmain(int argc, _TCHAR** argv)
         _ASSERTE(hMod == ::GetModuleHandleW(name));
 
         _tprintf(_T("Module handle retrieved for %ws: 0x%08p\n"), name, hMod);
+
+        FARPROC pFunc1Native = NT::GetProcAddress(hMod, "GetProcAddress");
+        FARPROC pFunc2Native = NT::GetProcAddress(hMod, (LPCSTR)682U);
+        _tprintf(_T("via name   : 0x%08p (PEB)\n"), pFunc1Native);
+        _tprintf(_T("via ordinal: 0x%08p (PEB)\n"), pFunc2Native);
+
+        FARPROC pFunc1Win32 = ::GetProcAddress(hMod, "GetProcAddress");
+        FARPROC pFunc2Win32 = ::GetProcAddress(hMod, (LPCSTR)682U);
+        _tprintf(_T("via name   : 0x%08p (Win32)\n"), pFunc1Win32);
+        _tprintf(_T("via ordinal: 0x%08p (Win32)\n"), pFunc2Win32);
     }
     else
     {

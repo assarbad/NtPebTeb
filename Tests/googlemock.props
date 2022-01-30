@@ -1,0 +1,30 @@
+﻿<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup>
+    <_PropertySheetDisplayName>GoogleMock-specific overrides</_PropertySheetDisplayName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googlemock;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googlemock;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-actions.h" />
+    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-cardinalities.h" />
+    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-function-mocker.h" />
+    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-matchers.h" />
+    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-more-actions.h" />
+    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-more-matchers.h" />
+    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-nice-strict.h" />
+    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-spec-builders.h" />
+    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(ProjectDir)googlemock\src\gmock-all.cc" />
+  </ItemGroup>
+</Project>

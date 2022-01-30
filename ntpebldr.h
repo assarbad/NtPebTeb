@@ -4,7 +4,7 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// Copyright (c) 2021 Oliver Schneider (assarbad.net)
+/// Copyright (c) 2021, 2022 Oliver Schneider (assarbad.net)
 ///
 /// Permission is hereby granted, free of charge, to any person obtaining a
 /// copy of this software and associated documentation files (the "Software"),
@@ -26,7 +26,7 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
-#define __NTPEBLDR_H_VER__ 2022011723
+#define __NTPEBLDR_H_VER__ 2022012523
 #if (defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP)
 #pragma once
 #endif // Check for "#pragma once" support
@@ -49,14 +49,15 @@ namespace NT
 // Must correspond to IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA from km/ntimage.h
 // Kernel mode address is KI_USER_SHARED_DATA (on ARM64 this is relocatable!)
 #if defined(_WIN32) && (defined(_M_IX86) || defined(_M_AMD64))
-#ifndef IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA
-#define IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA ((unsigned char*)0x7ffe0000)
+#ifndef MM_SHARED_USER_DATA_VA
+#define MM_SHARED_USER_DATA_VA                          ((unsigned char*)0x7ffe0000)
+#define IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA MM_SHARED_USER_DATA_VA
 #endif
-    WCHAR const* SystemRoot = ((WCHAR*)(IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA + 0x30));
+    WCHAR const* SystemRoot = ((WCHAR*)(MM_SHARED_USER_DATA_VA + 0x30));
     USHORT const& NativeProcessorArchitecture =
-        *((USHORT*)(IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA + 0x026a)); // PROCESSOR_ARCHITECTURE_AMD64 etc.
-    ULONG const& MajorVersion = *((ULONG*)(IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA + 0x026c));
-    ULONG const& MinorVersion = *((ULONG*)(IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA + 0x0270));
+        *((USHORT*)(MM_SHARED_USER_DATA_VA + 0x026a)); // PROCESSOR_ARCHITECTURE_AMD64 etc.
+    ULONG const& MajorVersion = *((ULONG*)(MM_SHARED_USER_DATA_VA + 0x026c));
+    ULONG const& MinorVersion = *((ULONG*)(MM_SHARED_USER_DATA_VA + 0x0270));
 #endif
 
     using byte = unsigned char;
@@ -188,6 +189,54 @@ namespace NT
                 return idx;
             }
 
+            STATIC_INLINE int strncmp_(char const* s1, char const* s2, size_t len)
+            {
+                if ((!s1 && !s2) || !len)
+                {
+                    return 0;
+                }
+                byte const* bs1 = (byte*)s1;
+                byte const* bs2 = (byte*)s2;
+                for (size_t idx = 0; idx <= len; idx++)
+                {
+                    auto const& b1 = bs1[idx];
+                    auto const& b2 = bs2[idx];
+                    if (b1 != b2)
+                    {
+                        return b1 - b2;
+                    }
+                    if (('\0' == b1) || ('\0' == b2))
+                    {
+                        return b1 - b2;
+                    }
+                }
+                return 0;
+            }
+
+            STATIC_INLINE int wcsncmp_(wchar_t const* s1, wchar_t const* s2, size_t len)
+            {
+                if ((!s1 && !s2) || !len)
+                {
+                    return 0;
+                }
+                unsigned short const* bs1 = (unsigned short*)s1;
+                unsigned short const* bs2 = (unsigned short*)s2;
+                for (size_t idx = 0; idx <= len; idx++)
+                {
+                    auto const& b1 = bs1[idx];
+                    auto const& b2 = bs2[idx];
+                    if (b1 != b2)
+                    {
+                        return b1 - b2;
+                    }
+                    if ((L'\0' == b1) || (L'\0' == b2))
+                    {
+                        return b1 - b2;
+                    }
+                }
+                return 0;
+            }
+
 #if __NAIVE_CRT_INLINES
             // Certainly naive and incomplete, but in all likelihood more than sufficient
             // for most purposes we're after here
@@ -305,7 +354,6 @@ namespace NT
         {
             return nullptr;
         }
-        LIST_ENTRY const* first = nullptr;
         switch (order)
         {
         case PebLdrOrder::load:
@@ -353,7 +401,7 @@ namespace NT
     {
         static PebLdrOrder const order = order_v;
         using data_t = T;
-        using func_t = NTSTATUS(CALLBACK*)(NT::LDR_DATA_TABLE_ENTRY_CTX const&, typename T&);
+        using func_t = NTSTATUS(CALLBACK*)(NT::LDR_DATA_TABLE_ENTRY_CTX const&, T&);
     };
 
     template <typename T>
@@ -422,7 +470,6 @@ namespace NT
 
         STATIC_INLINE void print_linked_list(LIST_ENTRY const* first, PebLdrOrder order, BOOLEAN bShowFullName = FALSE)
         {
-            // GetLdrDataTableEntry(current);
             auto const* current = first;
             ULONG idx = 0;
             do
@@ -433,13 +480,13 @@ namespace NT
                     _tprintf(_T("    [% 2u] @%p, %wZ: s = %u, f = 0x%08X, ep = @%p\n"),
                              idx,
                              e->DllBase,
-                             e->BaseDllName,
+                             &e->BaseDllName,
                              e->SizeOfImage,
                              e->Flags,
                              e->EntryPoint);
                     if (bShowFullName)
                     {
-                        _tprintf(_T("         %wZ\n"), e->FullDllName);
+                        _tprintf(_T("         %wZ\n"), &e->FullDllName);
                     }
                 }
                 current = current->Flink;
@@ -577,7 +624,7 @@ namespace NT
                 return STATUS_NOT_FOUND;
             }
 
-            template <typename CTX, typename callback<typename CTX>::func_t Predicate>
+            template <typename CTX, typename callback<CTX>::func_t Predicate>
             STATIC_INLINE HMODULE GetModHandle(UNICODE_STRING const& DllName)
             {
                 CTX context = {nullptr, DllName};
@@ -590,9 +637,18 @@ namespace NT
             }
         } // namespace by_string
 
+        constexpr byte const* checked_cast(byte const* start, byte const* beyond, size_t size)
+        {
+            if ((beyond <= start) || (start + size >= beyond))
+            {
+                return nullptr;
+            }
+            return start;
+        }
+
         template <typename T> constexpr T const* checked_cast(byte const* start, byte const* beyond)
         {
-            if ((beyond <= start) || (start + sizeof(T) >= beyond))
+            if (!checked_cast(start, beyond, sizeof(T)))
             {
                 return nullptr;
             }
@@ -640,6 +696,13 @@ namespace NT
 
     STATIC_INLINE HMODULE GetModuleHandleW(LPCWSTR DllName)
     {
+        if (!DllName)
+        {
+            constexpr PebLdrOrder const order = PebLdrOrder::memory;
+            auto const* head = GetPebLdrListHead(order);
+            auto const* ldrentry = GetLdrDataTableEntry(head, order);
+            return (HMODULE)ldrentry->DllBase;
+        }
         UNICODE_STRING usMod{0, 0, 0};
         ntdll::RtlInitUnicodeString(&usMod, DllName);
         HMODULE hMod = GetModHandleByBaseName(usMod);
@@ -663,14 +726,6 @@ namespace NT
     }
 #endif // 0
 
-    STATIC_INLINE HMODULE GetCurrentModule()
-    {
-        constexpr PebLdrOrder const order = PebLdrOrder::memory;
-        auto const* head = GetPebLdrListHead(order);
-        auto const* ldrentry = GetLdrDataTableEntry(head, order);
-        return (HMODULE)ldrentry->DllBase;
-    }
-
     STATIC_INLINE HMODULE GetNtDll()
     {
         constexpr PebLdrOrder const order = PebLdrOrder::memory;
@@ -679,40 +734,126 @@ namespace NT
         return (HMODULE)ldrentry->DllBase;
     }
 
-    STATIC_INLINE FARPROC GetProcAddress(HMODULE hMod, LPCSTR FuncName)
+    STATIC_INLINE IMAGE_DATA_DIRECTORY const GetDataDirectory(IMAGE_NT_HEADERS64 const* nthdrs, DWORD datadir_index)
     {
-        using namespace predefined_helpers;
-        auto const traits = by_trait::GetModTraits(hMod);
-        auto const* nthdrs = GetImageNtHeaders(traits);
         if (!nthdrs)
         {
-            return nullptr;
+            return {};
         }
-
-        IMAGE_NT_HEADERS32 const* nthdrs32 = nullptr;
         switch (nthdrs->FileHeader.Machine)
         {
         case IMAGE_FILE_MACHINE_I386:
-            nthdrs32 = (IMAGE_NT_HEADERS32*)nthdrs;
-            break;
+            {
+                auto const* nthdrs32 = (IMAGE_NT_HEADERS32*)nthdrs;
+                if (datadir_index < nthdrs32->OptionalHeader.NumberOfRvaAndSizes)
+                {
+                    return nthdrs32->OptionalHeader.DataDirectory[datadir_index];
+                }
+            }
         case IMAGE_FILE_MACHINE_AMD64:
-            break;
-        default:
+            if (datadir_index < nthdrs->OptionalHeader.NumberOfRvaAndSizes)
+            {
+                return nthdrs->OptionalHeader.DataDirectory[datadir_index];
+            }
+        }
+        return {};
+    }
+
+    STATIC_INLINE IMAGE_DATA_DIRECTORY const GetDataDirectory(HMODULE hMod, DWORD datadir_index)
+    {
+        using namespace predefined_helpers;
+        auto const traits = by_trait::GetModTraits(hMod);
+        if (!NT_SUCCESS(traits.Status))
+        {
+            return {};
+        }
+        auto const* nthdrs = GetImageNtHeaders(traits);
+        return GetDataDirectory(nthdrs, datadir_index);
+    }
+
+    STATIC_INLINE IMAGE_EXPORT_DIRECTORY const* GetExportDirectory(HMODULE hMod)
+    {
+        using namespace predefined_helpers;
+        auto const traits = by_trait::GetModTraits(hMod);
+        if (!NT_SUCCESS(traits.Status))
+        {
+            return nullptr;
+        }
+        auto const* nthdrs = GetImageNtHeaders(traits);
+        IMAGE_DATA_DIRECTORY const expdatadir = GetDataDirectory(nthdrs, IMAGE_DIRECTORY_ENTRY_EXPORT);
+
+        if (expdatadir.Size && expdatadir.VirtualAddress)
+        {
+            auto const* const mod = (byte*)traits.DllBase;
+            auto const* const modend = mod + traits.SizeOfImage;
+            auto const* expdir = checked_cast<IMAGE_EXPORT_DIRECTORY>(&mod[expdatadir.VirtualAddress], modend);
+            if (expdir && checked_cast((byte*)expdir, modend, expdatadir.Size))
+            {
+                return expdir;
+            }
+        }
+        return nullptr;
+    }
+
+    STATIC_INLINE FARPROC GetProcAddress(HMODULE hMod, LPCSTR FuncName)
+    {
+        auto const* expdir = GetExportDirectory(hMod);
+
+        if (!expdir || !FuncName)
+        {
             return nullptr;
         }
 
+        auto const* const mod = (byte*)hMod;
+        // RVAs to the names of named exports
+        auto const* const rvaNames = (ULONG*)&mod[expdir->AddressOfNames];
+        // Parallel to the above, contains the index into AddressOfFunctions
+        auto const* const rvaNameOrdinals = (USHORT*)&mod[expdir->AddressOfNameOrdinals];
+        auto const* const rvaFunctions = (ULONG*)&mod[expdir->AddressOfFunctions];
+        #if 0
+        char const* const modName = (char*)&mod[expdir->Name];
+        _tprintf(_T("[%hs] Base: 0x%08X; version: %u.%u\n"),
+                 modName,
+                 expdir->Base,
+                 expdir->MajorVersion,
+                 expdir->MinorVersion);
+        #endif
+
         if (IS_INTRESOURCE(FuncName))
         {
-            // By ordinal
+            USHORT const idx = USHORT((ULONG_PTR)FuncName - expdir->Base);
+            if (idx < expdir->NumberOfFunctions)
+            {
+                char const* const ExpFuncName = (char*)&mod[rvaNames[idx]];
+#if 0
+                    _tprintf(_T("Found ordinal idx %zu: %hs -> RVA:0x%08X\n"),
+                             idx,
+                             ExpFuncName,
+                             rvaFunctions[idx);
+#endif
+                return (FARPROC)(rvaFunctions[idx] + mod);
+            }
         }
         else
         {
-            // By name
+            size_t const FuncNameLen = ntdll::crt::strlen_(FuncName);
+            for (size_t idx = 0; idx < expdir->NumberOfNames; idx++)
+            {
+                char const* const ExpFuncName = (char*)mod + rvaNames[idx];
+                if (0 == ntdll::crt::strncmp_(FuncName, ExpFuncName, FuncNameLen))
+                {
+                    auto const addridx = rvaNameOrdinals[idx];
+                    #if 0
+                    _tprintf(_T("Found name idx    %zu: %hs -> RVA:0x%08X\n"),
+                             idx,
+                             ExpFuncName,
+                             rvaFunctions[addridx]);
+                    #endif
+                    return (FARPROC)(rvaFunctions[addridx] + mod);
+                }
+            }
         }
-        // RtlAllocateHeap
-        // RtlProcessHeap
-        // RtlCopyMemory
-        // RtlFreeHeap
+
         return nullptr;
     }
 } // namespace NT

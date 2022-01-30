@@ -60,6 +60,7 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(SolutionDir)project.props" Condition="exists('$(SolutionDir)project.props')" Label="ProjectSpecific (solution)" />
     <Import Project="$(ProjectDir)googletest.props" Condition="exists('$(ProjectDir)googletest.props')" Label="Google Test (local)" />
+    <Import Project="$(ProjectDir)googlemock.props" Condition="exists('$(ProjectDir)googlemock.props')" Label="Google Mock (local)" />
     <Import Project="$(ProjectDir)project.props" Condition="exists('$(ProjectDir)project.props') AND '$(SolutionDir)' != '$(ProjectDir)'" Label="Project-specific (local)" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -144,6 +145,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Crt.cpp" />
+    <ClCompile Include="kernelbase-reimpl.cpp" />
+    <ClCompile Include="ntdll-reimpl.cpp" />
     <ClCompile Include="Tests.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
