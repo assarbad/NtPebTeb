@@ -25,7 +25,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalOptions>/map /pdbaltpath:%_PDB% /dynamicbase /nxcompat %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/pdbaltpath:%_PDB% /dynamicbase /nxcompat %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
@@ -55,10 +55,5 @@
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(SolutionDir)'=='$(ProjectDir)'">
-    <PreBuildEvent>
-      <Command>call "$(ProjectDir)\hgid.cmd"</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
 </Project>

@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{E7F07D8F-5D16-1223-4A5A-365E8D475D68}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{DB22593D-CE3A-8AD5-7D5A-1251E10A5DBA}</UniqueIdentifier>
     </Filter>
@@ -15,15 +12,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="hgid.cmd">
+    <None Include="README.md" />
+    <None Include="premake4.lua">
       <Filter>Special Files</Filter>
     </None>
+    <None Include="project.props" />
     <None Include=".editorconfig" />
     <None Include=".clang-format" />
-    <None Include=".hgignore">
+    <None Include=".gitignore">
       <Filter>Special Files</Filter>
     </None>
-    <None Include="README.md" />
+    <None Include=".hgignore">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="exeversion.h">
@@ -40,10 +41,5 @@
     <ClCompile Include="NtPebTeb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="exeversion.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>

@@ -1,119 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+      <UniqueIdentifier>{83155746-F4A0-04A9-8796-6C2645DA59FB}</UniqueIdentifier>
     </Filter>
     <Filter Include="Google">
-      <UniqueIdentifier>{94afcd03-38bf-4393-b3d6-4c649dd6dcab}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Google\Test">
-      <UniqueIdentifier>{98eeeb7b-a858-4207-8f70-82907fda6cd7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Google\Test\Source Files">
-      <UniqueIdentifier>{7232b266-a047-4556-bfc2-3703e2694d59}</UniqueIdentifier>
+      <UniqueIdentifier>{3AC720FC-93ED-D8CA-C935-766FEF038ED6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Google\Mock">
-      <UniqueIdentifier>{f5778b25-e58e-4662-9a2a-5a70f30c731b}</UniqueIdentifier>
+      <UniqueIdentifier>{21B88884-E3B7-702E-13F3-1F8B078BBCB2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Google\Mock\Header Files">
-      <UniqueIdentifier>{f7eb5f3e-2bee-43e2-b262-dbf9206bab3a}</UniqueIdentifier>
+      <UniqueIdentifier>{75931F6D-EFAC-4883-DA37-85564F25253B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Google\Test">
+      <UniqueIdentifier>{ED14519A-FB1C-661E-AD4B-E18542032EDF}</UniqueIdentifier>
     </Filter>
     <Filter Include="Google\Test\Header Files">
-      <UniqueIdentifier>{16656b4a-4c12-4eea-b79a-a67f0d0bbbd7}</UniqueIdentifier>
+      <UniqueIdentifier>{96EE7890-EE52-628B-97B9-B8D12B2C9218}</UniqueIdentifier>
     </Filter>
     <Filter Include="Google\Mock\Source Files">
-      <UniqueIdentifier>{94d94187-fdad-4168-8d89-6ef509269d56}</UniqueIdentifier>
+      <UniqueIdentifier>{A9B9CC69-3E97-53AD-2F4D-2D351BF76BDA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Google\Test\Source Files">
+      <UniqueIdentifier>{9B60E208-361C-2E90-BB05-2B3B6938138E}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Tests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ProjectDir)googletest\src\gtest-all.cc">
+    <ClInclude Include="googlemock\include\gmock\gmock-actions.h">
+      <Filter>Google\Mock\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googlemock\include\gmock\gmock-cardinalities.h">
+      <Filter>Google\Mock\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googlemock\include\gmock\gmock-function-mocker.h">
+      <Filter>Google\Mock\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googlemock\include\gmock\gmock-matchers.h">
+      <Filter>Google\Mock\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googlemock\include\gmock\gmock-more-actions.h">
+      <Filter>Google\Mock\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googlemock\include\gmock\gmock-more-matchers.h">
+      <Filter>Google\Mock\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googlemock\include\gmock\gmock-nice-strict.h">
+      <Filter>Google\Mock\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googlemock\include\gmock\gmock-spec-builders.h">
+      <Filter>Google\Mock\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googlemock\include\gmock\gmock.h">
+      <Filter>Google\Mock\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googletest\include\gtest\gtest-death-test.h">
+      <Filter>Google\Test\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googletest\include\gtest\gtest-matchers.h">
+      <Filter>Google\Test\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googletest\include\gtest\gtest-message.h">
+      <Filter>Google\Test\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googletest\include\gtest\gtest-param-test.h">
+      <Filter>Google\Test\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googletest\include\gtest\gtest-printers.h">
+      <Filter>Google\Test\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googletest\include\gtest\gtest-spi.h">
+      <Filter>Google\Test\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googletest\include\gtest\gtest-test-part.h">
+      <Filter>Google\Test\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googletest\include\gtest\gtest-typed-test.h">
+      <Filter>Google\Test\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googletest\include\gtest\gtest.h">
+      <Filter>Google\Test\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googletest\include\gtest\gtest_pred_impl.h">
+      <Filter>Google\Test\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googletest\include\gtest\gtest_prod.h">
+      <Filter>Google\Test\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googletest\src\gtest-internal-inl.h">
       <Filter>Google\Test\Source Files</Filter>
-    </ClCompile>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="Crt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ntdll-reimpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="kernelbase-reimpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)googlemock\src\gmock-all.cc">
+    <ClCompile Include="ntdll-reimpl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="googlemock\src\gmock-all.cc">
       <Filter>Google\Mock\Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest.h">
-      <Filter>Google\Test\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest_pred_impl.h">
-      <Filter>Google\Test\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest_prod.h">
-      <Filter>Google\Test\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-death-test.h">
-      <Filter>Google\Test\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-matchers.h">
-      <Filter>Google\Test\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-message.h">
-      <Filter>Google\Test\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-param-test.h">
-      <Filter>Google\Test\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-printers.h">
-      <Filter>Google\Test\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-spi.h">
-      <Filter>Google\Test\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-test-part.h">
-      <Filter>Google\Test\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googletest\include\gtest\gtest-typed-test.h">
-      <Filter>Google\Test\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googletest\src\gtest-internal-inl.h">
+    <ClCompile Include="googletest\src\gtest-all.cc">
       <Filter>Google\Test\Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock.h">
-      <Filter>Google\Mock\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-actions.h">
-      <Filter>Google\Mock\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-cardinalities.h">
-      <Filter>Google\Mock\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-function-mocker.h">
-      <Filter>Google\Mock\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-matchers.h">
-      <Filter>Google\Mock\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-more-actions.h">
-      <Filter>Google\Mock\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-more-matchers.h">
-      <Filter>Google\Mock\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-nice-strict.h">
-      <Filter>Google\Mock\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)googlemock\include\gtest\gmock-spec-builders.h">
-      <Filter>Google\Mock\Header Files</Filter>
-    </ClInclude>
+    </ClCompile>
   </ItemGroup>
 </Project>

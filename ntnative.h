@@ -1410,7 +1410,7 @@ typedef NTSTATUS (NTAPI *NtRemoveIoCompletion_t)(_In_ HANDLE, _Out_ PVOID*, _Out
 typedef NTSTATUS (NTAPI *NtQueryEvent_t)(_In_ HANDLE, _In_ EVENT_INFORMATION_CLASS, _Out_ PVOID, _In_ ULONG, _Out_opt_ PULONG);
 typedef NTSTATUS (NTAPI *NtQueryIoCompletion_t)(_In_ HANDLE, _In_ IO_COMPLETION_INFORMATION_CLASS, _Out_ PVOID, _In_ ULONG, _Out_opt_ PULONG);
 typedef NTSTATUS (NTAPI *NtQueryMutant_t)(_In_ HANDLE, _In_ MUTANT_INFORMATION_CLASS, _Out_ PVOID, _In_ ULONG, _Out_opt_ PULONG);
-typedef NTSTATUS (NTAPI *NtQueryObject_t)(_In_opt_ HANDLE, _In_ OBJECT_INFORMATION_CLASS, _Out_ PVOID, _In_ ULONG, _Out_opt_ PULONG);
+typedef NTSTATUS (NTAPI *NtQueryObject_t)(_In_opt_ HANDLE, _In_ OBJECT_INFORMATION_CLASS, _Out_opt_ PVOID, _In_ ULONG, _Out_opt_ PULONG);
 typedef NTSTATUS (NTAPI *NtQuerySemaphore_t)(_In_ HANDLE, _In_ SEMAPHORE_INFORMATION_CLASS, _Out_ PVOID, _In_ ULONG, _Out_opt_ PULONG);
 typedef NTSTATUS (NTAPI *NtQuerySection_t)(_In_ HANDLE, _In_ SECTION_INFORMATION_CLASS, _Out_ PVOID, _In_ ULONG, _Out_ PULONG);
 typedef NTSTATUS (NTAPI *NtQueryTimer_t)(_In_ HANDLE, _In_ TIMER_INFORMATION_CLASS, _Out_ PVOID, _In_ ULONG, _Out_ PULONG);
@@ -1479,7 +1479,6 @@ typedef BOOLEAN (NTAPI *RtlIsNameLegalDOS8Dot3_t)(_In_ PUNICODE_STRING, _Inout_o
 typedef ULONG (NTAPI *RtlNtStatusToDosError_t)(NTSTATUS);
 typedef NTSTATUS (NTAPI *NtQueryInformationProcess_t)(_In_ HANDLE, _In_ PROCESSINFOCLASS, _Out_ PVOID, _In_ ULONG, _Out_opt_ PULONG);
 typedef NTSTATUS (NTAPI *NtQueryInformationThread_t)(_In_ HANDLE, _In_ THREADINFOCLASS, _Out_ PVOID, _In_ ULONG, _Out_opt_ PULONG);
-typedef NTSTATUS (NTAPI *NtQueryObject_t)(_In_opt_ HANDLE, _In_ OBJECT_INFORMATION_CLASS, _Out_opt_ PVOID, _In_ ULONG, _Out_opt_ PULONG);
 typedef NTSTATUS (NTAPI *NtQuerySystemInformation_t)(_In_ SYSTEM_INFORMATION_CLASS, _Out_ PVOID, _In_ ULONG, _Out_opt_ PULONG);
 typedef NTSTATUS (NTAPI *NtQuerySystemTime_t)(_Out_ PLARGE_INTEGER);
 typedef NTSTATUS (NTAPI *RtlLocalTimeToSystemTime_t)(_In_ PLARGE_INTEGER, _Out_ PLARGE_INTEGER);
