@@ -259,21 +259,16 @@ do
         _G._p = function(indent, msg, first, ...)
             -- Look for non-empty messages and narrow it down by the indent values
             if msg ~= nil then
-                if msg:match("<ProgramDataBaseFileName>[^<]+</ProgramDataBaseFileName>") then
-                    return -- we want to suppress these
-                end
                 -- Allow this logic to be hooked and the hook to preempt any action hardcoded below
                 if (_G.override_vcxproj ~= nil) and (type(_G.override_vcxproj) == 'function') then
                     if _G.override_vcxproj(prj, orig_p, indent, msg, first, ...) then
                         return -- suppress further output
                     end
                 end
+                if msg:match("<ProgramDataBaseFileName>[^<]+</ProgramDataBaseFileName>") then
+                    return -- we want to suppress these
+                end
                 if indent == 2 then
-                    if msg == '<ClCompile Include=\"%s\">' and first == "delayload-stubs\\ntdll-delayed-stubs.c" then
-                        orig_p(indent, msg, first, ...) -- what was originally supposed to be output
-                        orig_p(indent+1, "<ExcludedFromBuild>true</ExcludedFromBuild>")
-                        return
-                    end
                     if msg == "<RootNamespace>%s</RootNamespace>" then
                         local sdkmap = {vs2015 = "8.1", vs2017 = "10.0.17763.0", vs2019 = "10.0", vs2022 = "10.0"}
                         if (not _ACTION) or (not sdkmap[_ACTION]) then -- should not happen, but tread carefully anyway
