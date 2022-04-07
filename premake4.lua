@@ -21,7 +21,7 @@ solution ("NtPebTeb")
         uuid            ("9D0269DA-AB26-4548-9424-58418D848B24")
         language        ("C++")
         kind            ("ConsoleApp")
-        flags           {"Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
+        flags           {"StaticRuntime", "Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
         defines         {"WIN32", "_CONSOLE",}
 
         files
