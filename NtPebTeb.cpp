@@ -30,15 +30,15 @@
 #include <cstdio>
 #include <tchar.h>
 #ifdef _DEBUG
-#include <crtdbg.h>
+#    include <crtdbg.h>
 #else
-#define _ASSERTE(...)    \
-    do                   \
-    {                    \
-        if (__VA_ARGS__) \
-        {                \
-        }                \
-    } while (0)
+#    define _ASSERTE(...)    \
+        do                   \
+        {                    \
+            if (__VA_ARGS__) \
+            {                \
+            }                \
+        } while (0)
 #endif // _DEBUG
 
 #include "ntpebldr.h"

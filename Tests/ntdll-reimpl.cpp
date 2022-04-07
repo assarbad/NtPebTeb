@@ -37,8 +37,7 @@ class Ntdll : public ::testing::Test
 
 TEST_F(Ntdll, RtlCompareUnicodeString)
 {
-    auto testComparison =
-        [=](PCUNICODE_STRING s1, PCUNICODE_STRING s2, BOOLEAN caseInSensitive, auto predicate)
+    auto testComparison = [=](PCUNICODE_STRING s1, PCUNICODE_STRING s2, BOOLEAN caseInSensitive, auto predicate)
     {
         LONG theirs = RtlCompareUnicodeString(s1, s2, caseInSensitive);
         LONG ours = NT::ntdll::RtlCompareUnicodeString(s1, s2, caseInSensitive);

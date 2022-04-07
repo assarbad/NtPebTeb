@@ -1,4 +1,9 @@
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+Language: Cpp
 BasedOnStyle: Microsoft
+Standard: c++17
 AlignAfterOpenBracket: Align
 # Requires clang-format 12
 AlignConsecutiveMacros: AcrossEmptyLinesAndComments
@@ -9,8 +14,6 @@ BinPackParameters: false
 ColumnLimit: 120
 IndentCaseLabels: false
 IndentCaseBlocks: true
-IndentWidth: 4
-Language: Cpp
 PointerAlignment: Left
 SpaceAfterCStyleCast: false
 SpaceBeforeAssignmentOperators: true
@@ -18,11 +21,12 @@ SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
-Standard: Cpp11
-TabWidth: 4
-UseTab: Never
 FixNamespaceComments: true
 NamespaceIndentation: All
 BreakBeforeBraces: Allman
+IndentPPDirectives: AfterHash
+# AlignArrayOfStructures: Right // clang-format-13
 BreakConstructorInitializers: BeforeComma
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
+IncludeBlocks: Preserve
+IndentExternBlock: Indent
