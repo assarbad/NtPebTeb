@@ -1,4 +1,8 @@
+#pragma warning(push)
+#pragma warning(disable : 4244 4389)
 #include <gtest/gtest.h>
+#pragma warning(pop)
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <cstring>

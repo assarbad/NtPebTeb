@@ -831,12 +831,12 @@ namespace NT
             USHORT const idx = USHORT((ULONG_PTR)FuncName - expdir->Base);
             if (idx < expdir->NumberOfFunctions)
             {
-                char const* const ExpFuncName = (char*)&mod[rvaNames[idx]];
 #if 0
-                    _tprintf(_T("Found ordinal idx %zu: %hs -> RVA:0x%08X\n"),
-                             idx,
-                             ExpFuncName,
-                             rvaFunctions[idx);
+                char const* const ExpFuncName = (char*)&mod[rvaNames[idx]];
+                _tprintf(_T("Found ordinal idx %zu: %hs -> RVA:0x%08X\n"),
+                            idx,
+                            ExpFuncName,
+                            rvaFunctions[idx);
 #endif
                 return (FARPROC)(rvaFunctions[idx] + mod);
             }

@@ -1,4 +1,8 @@
+#pragma warning(push)
+#pragma warning(disable : 4244 4389)
 #include <gtest/gtest.h>
+#pragma warning(pop)
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <cstring>
@@ -60,12 +64,12 @@ NameOrdVec RetrieveExportsByDllName(std::wstring dll)
     auto const* const modBeyond = mod + traits.SizeOfImage;
     auto const* const rvaNames = (ULONG*)&mod[expdir->AddressOfNames];
     auto const* const rvaNameOrdinals = (USHORT*)&mod[expdir->AddressOfNameOrdinals];
-    auto const* const rvaFunctions = (ULONG*)&mod[expdir->AddressOfFunctions];
-    auto const* const modname = (char*)&mod[expdir->Name];
+    // auto const* const rvaFunctions = (ULONG*)&mod[expdir->AddressOfFunctions];
     NameOrdVec retval;
     // We have an upper estimate, so let's optimize
     retval.reserve(expdir->NumberOfFunctions);
-    //_tprintf(_T("DLL name: %hs\n"), modname);
+    // auto const* const modname = (char*)&mod[expdir->Name];
+    // _tprintf(_T("DLL name: %hs\n"), modname);
     for (size_t index = 0; index < expdir->NumberOfNames; index++)
     {
         // Retrieve RVA to the name of the function
@@ -73,7 +77,6 @@ NameOrdVec RetrieveExportsByDllName(std::wstring dll)
         // Compute VA from RVA
         auto const* const ExpFuncName = (char*)&mod[nameRVA];
         FARPROC funcptr = ::GetProcAddress(hMod, ExpFuncName);
-        auto const FuncAddrRVA = rvaFunctions[rvaNameOrdinals[index]];
         auto const Ordinal = (USHORT)rvaNameOrdinals[index] + (USHORT)expdir->Base;
 
         if (((byte*)funcptr > mod) && ((byte*)funcptr < modBeyond))

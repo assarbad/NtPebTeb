@@ -86,7 +86,6 @@
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googletest\include;$(ProjectDir)googlemock;$(ProjectDir)googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -101,7 +100,6 @@
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googletest\include;$(ProjectDir)googlemock;$(ProjectDir)googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -116,7 +114,6 @@
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googletest\include;$(ProjectDir)googlemock;$(ProjectDir)googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -131,7 +128,6 @@
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googletest\include;$(ProjectDir)googlemock;$(ProjectDir)googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>

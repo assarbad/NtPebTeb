@@ -43,7 +43,7 @@
 
 #include "ntpebldr.h"
 
-int _tmain(int argc, _TCHAR** argv)
+int _tmain(int, _TCHAR**)
 {
     _tprintf(_T("SystemRoot = %ws\n"), NT::SystemRoot);
     _tprintf(_T("NT = %u.%u (arch: %u)\n"), NT::MajorVersion, NT::MinorVersion, NT::NativeProcessorArchitecture);

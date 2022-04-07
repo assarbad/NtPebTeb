@@ -109,6 +109,7 @@ do
         ['<EnableCOMDATFolding>true</EnableCOMDATFolding>'] = 0,
         ['<OutputFile>$(OutDir)%s</OutputFile>'] = 0,
         ['<AdditionalLibraryDirectories>%s;%%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>'] = 0,
+        ['<WarningLevel>Level3</WarningLevel>'] = 0,
     }
     -- Embed the property sheet
     _G.override_vcxproj = function(prj, orig_p, indent, msg, first, ...)
