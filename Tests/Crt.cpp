@@ -4,6 +4,7 @@
 #pragma warning(pop)
 
 #define WIN32_LEAN_AND_MEAN
+#define WIN32_NO_STATUS
 #include <Windows.h>
 #include <cstring>
 #include <tchar.h>

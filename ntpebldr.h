@@ -33,11 +33,48 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
-#define __NTPEBLDR_H_VER__ 2022012523
+#define __NTPEBLDR_H_VER__ 2022051022
 #if (defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP)
 #    pragma once
 #endif // Check for "#pragma once" support
-#include "./ntnative.h"
+#if defined(WIN32_NO_STATUS)
+#    undef _NTSTATUS_
+#    undef WIN32_NO_STATUS
+#    include <ntstatus.h>
+#endif
+#include <winternl.h>
+
+#ifndef RTL_CONSTANT_STRING
+#    if defined(__cplusplus)
+extern "C++"
+{
+    char _RTL_CONSTANT_STRING_type_check(const char* s);
+    char _RTL_CONSTANT_STRING_type_check(const WCHAR* s);
+    // __typeof would be desirable here instead of sizeof.
+    template <size_t N> class _RTL_CONSTANT_STRING_remove_const_template_class;
+    template <> class _RTL_CONSTANT_STRING_remove_const_template_class<sizeof(char)>
+    {
+      public:
+        typedef char T;
+    };
+    template <> class _RTL_CONSTANT_STRING_remove_const_template_class<sizeof(WCHAR)>
+    {
+      public:
+        typedef WCHAR T;
+    };
+#        define _RTL_CONSTANT_STRING_remove_const_macro(s) \
+            (const_cast<_RTL_CONSTANT_STRING_remove_const_template_class<sizeof((s)[0])>::T*>(s))
+}
+#    else
+char _RTL_CONSTANT_STRING_type_check(const void* s);
+#        define _RTL_CONSTANT_STRING_remove_const_macro(s) (s)
+#    endif // __cplusplus
+#    define RTL_CONSTANT_STRING(s)                                                                \
+        {                                                                                         \
+            sizeof(s) - sizeof((s)[0]), sizeof(s) / (sizeof(_RTL_CONSTANT_STRING_type_check(s))), \
+                _RTL_CONSTANT_STRING_remove_const_macro(s)                                        \
+        }
+#endif // RTL_CONSTANT_STRING
 
 #ifndef __NAIVE_CRT_INLINES
 #    define __NAIVE_CRT_INLINES 1
