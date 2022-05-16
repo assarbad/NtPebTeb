@@ -10,11 +10,15 @@
 #include <tchar.h>
 #include <tuple>
 
+#ifdef NO_TEST_NAMESPACE
 namespace
 {
-#define __NAIVE_CRT_INLINES 1
+#endif // NO_TEST_NAMESPACE
+#define NTPEBLDR_NAIVE_CRT_INLINES 1
 #include "../ntpebldr.h"
+#ifdef NO_TEST_NAMESPACE
 } // namespace
+#endif // NO_TEST_NAMESPACE
 
 using NT::byte;
 using std::wstring;

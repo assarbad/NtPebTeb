@@ -5,11 +5,15 @@
 #include <cstring>
 #include <tchar.h>
 
+#ifdef NO_TEST_NAMESPACE
 namespace
 {
-#define __NAIVE_CRT_INLINES 1
+#endif // NO_TEST_NAMESPACE
+#define NTPEBLDR_NAIVE_CRT_INLINES 1
 #include "../ntpebldr.h"
+#ifdef NO_TEST_NAMESPACE
 } // namespace
+#endif // NO_TEST_NAMESPACE
 
 class Ntdll : public ::testing::Test
 {
@@ -47,17 +51,17 @@ TEST_F(Ntdll, RtlCompareUnicodeString)
         ASSERT_EQ(ours, theirs) << "Expected our and their implementation to match!";
     };
 
-    UNICODE_STRING const foo = RTL_CONSTANT_STRING(L"foo");
-    UNICODE_STRING const foobar = RTL_CONSTANT_STRING(L"foobar");
-    UNICODE_STRING const bar = RTL_CONSTANT_STRING(L"bar");
+    UNICODE_STRING const foo = NT::InitUnicodeString(L"foo");
+    UNICODE_STRING const foobar = NT::InitUnicodeString(L"foobar");
+    UNICODE_STRING const bar = NT::InitUnicodeString(L"bar");
 
     testComparison(&foo, &foo, FALSE, [](auto x) { return x == 0; });
     testComparison(&foo, &foobar, FALSE, [](auto x) { return x < 0; });
     testComparison(&foo, &bar, FALSE, [](auto x) { return x > 0; });
 
-    UNICODE_STRING const FOO = RTL_CONSTANT_STRING(L"FOO");
-    UNICODE_STRING const FOOBAR = RTL_CONSTANT_STRING(L"FOOBAR");
-    UNICODE_STRING const BAR = RTL_CONSTANT_STRING(L"BAR");
+    UNICODE_STRING const FOO = NT::InitUnicodeString(L"FOO");
+    UNICODE_STRING const FOOBAR = NT::InitUnicodeString(L"FOOBAR");
+    UNICODE_STRING const BAR = NT::InitUnicodeString(L"BAR");
 
     testComparison(&foo, &FOO, TRUE, [](auto x) { return x == 0; });
     testComparison(&foo, &FOOBAR, TRUE, [](auto x) { return x < 0; });

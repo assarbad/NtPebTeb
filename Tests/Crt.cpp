@@ -9,9 +9,11 @@
 #include <cstring>
 #include <tchar.h>
 
+#ifdef NO_TEST_NAMESPACE
 namespace
 {
-#define __NAIVE_CRT_INLINES 1
+#endif // NO_TEST_NAMESPACE
+#define NTPEBLDR_NAIVE_CRT_INLINES 1
 #include "../ntpebldr.h"
 
     TEST(Crt, strlen)
@@ -97,4 +99,6 @@ namespace
             ASSERT_EQ(NT::ntdll::crt::toupper_(chr), ::toupper(chr));
         }
     }
+#ifdef NO_TEST_NAMESPACE
 } // namespace
+#endif // NO_TEST_NAMESPACE

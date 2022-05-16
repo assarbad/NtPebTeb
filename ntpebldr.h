@@ -33,54 +33,31 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
-#define __NTPEBLDR_H_VER__ 2022051022
+#define __NTPEBLDR_H_VER__ 2022051621
 #if (defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP)
 #    pragma once
 #endif // Check for "#pragma once" support
 #if defined(WIN32_NO_STATUS)
 #    undef _NTSTATUS_
 #    undef WIN32_NO_STATUS
-#    include <ntstatus.h>
 #endif
+#pragma warning(disable : 4005)
+#include <ntstatus.h>
+#pragma warning(default : 4005)
 #include <winternl.h>
 
-#ifndef RTL_CONSTANT_STRING
-#    if defined(__cplusplus)
-extern "C++"
-{
-    char _RTL_CONSTANT_STRING_type_check(const char* s);
-    char _RTL_CONSTANT_STRING_type_check(const WCHAR* s);
-    // __typeof would be desirable here instead of sizeof.
-    template <size_t N> class _RTL_CONSTANT_STRING_remove_const_template_class;
-    template <> class _RTL_CONSTANT_STRING_remove_const_template_class<sizeof(char)>
-    {
-      public:
-        typedef char T;
-    };
-    template <> class _RTL_CONSTANT_STRING_remove_const_template_class<sizeof(WCHAR)>
-    {
-      public:
-        typedef WCHAR T;
-    };
-#        define _RTL_CONSTANT_STRING_remove_const_macro(s) \
-            (const_cast<_RTL_CONSTANT_STRING_remove_const_template_class<sizeof((s)[0])>::T*>(s))
-}
-#    else
-char _RTL_CONSTANT_STRING_type_check(const void* s);
-#        define _RTL_CONSTANT_STRING_remove_const_macro(s) (s)
-#    endif // __cplusplus
-#    define RTL_CONSTANT_STRING(s)                                                                \
-        {                                                                                         \
-            sizeof(s) - sizeof((s)[0]), sizeof(s) / (sizeof(_RTL_CONSTANT_STRING_type_check(s))), \
-                _RTL_CONSTANT_STRING_remove_const_macro(s)                                        \
+#ifndef NTPEBLDR_LITERAL_UNICODE_STRING
+#    define NTPEBLDR_LITERAL_UNICODE_STRING(s)                            \
+        {                                                                 \
+            sizeof(s) - sizeof(s[0]), sizeof(s), const_cast<PWSTR>(L"" s) \
         }
-#endif // RTL_CONSTANT_STRING
+#endif // NTPEBLDR_LITERAL_UNICODE_STRING
 
-#ifndef __NAIVE_CRT_INLINES
-#    define __NAIVE_CRT_INLINES 1
+#ifndef NTPEBLDR_NAIVE_CRT_INLINES
+#    define NTPEBLDR_NAIVE_CRT_INLINES 1
 #endif
 #define STATIC_INLINE static inline
-#if !__NAIVE_CRT_INLINES
+#if !NTPEBLDR_NAIVE_CRT_INLINES
 #    include <cstdio> // towupper/towlower et. al.
 #endif
 #include <cstddef> // offsetof etc
@@ -97,11 +74,13 @@ namespace NT
 #        define MM_SHARED_USER_DATA_VA                          ((unsigned char*)0x7ffe0000)
 #        define IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA MM_SHARED_USER_DATA_VA
 #    endif
-    WCHAR const* SystemRoot = ((WCHAR*)(MM_SHARED_USER_DATA_VA + 0x30));
-    USHORT const& NativeProcessorArchitecture =
-        *((USHORT*)(MM_SHARED_USER_DATA_VA + 0x026a)); // PROCESSOR_ARCHITECTURE_AMD64 etc.
-    ULONG const& MajorVersion = *((ULONG*)(MM_SHARED_USER_DATA_VA + 0x026c));
-    ULONG const& MinorVersion = *((ULONG*)(MM_SHARED_USER_DATA_VA + 0x0270));
+    namespace
+    {
+        WCHAR const (&SystemRoot)[260] = (decltype(SystemRoot))(*(WCHAR*)(MM_SHARED_USER_DATA_VA + 0x30));
+        USHORT const& NativeProcessorArchitecture = *((USHORT*)(MM_SHARED_USER_DATA_VA + 0x026a));
+        ULONG const& MajorVersion = *((ULONG*)(MM_SHARED_USER_DATA_VA + 0x026c));
+        ULONG const& MinorVersion = *((ULONG*)(MM_SHARED_USER_DATA_VA + 0x0270));
+    } // namespace
 #endif
 
     using byte = unsigned char;
@@ -281,7 +260,7 @@ namespace NT
                 return 0;
             }
 
-#if __NAIVE_CRT_INLINES
+#if NTPEBLDR_NAIVE_CRT_INLINES
             // Certainly naive and incomplete, but in all likelihood more than sufficient
             // for most purposes we're after here
             STATIC_INLINE WCHAR towlower_(WCHAR ch)
@@ -374,6 +353,13 @@ namespace NT
             }
         }
     } // namespace ntdll
+
+    template <typename T, size_t Length>
+    STATIC_INLINE constexpr UNICODE_STRING const InitUnicodeString(T const (&str)[Length])
+    {
+        static_assert(Length == sizeof(str) / sizeof(str[0]), "Well, crap ...");
+        return {sizeof(str) - sizeof(str[0]), sizeof(str), const_cast<PWSTR>(&str[0])};
+    }
 
     STATIC_INLINE PEB_LDR_DATA* GetPebLdr()
     {
@@ -474,7 +460,7 @@ namespace NT
         return STATUS_NO_MORE_ENTRIES; // we've reached the list end
     }
 
-#if defined(PRINT_FUNCS) || defined(_DEBUG)
+#if defined(NTPEBLDR_PRINT_FUNCS) || defined(_DEBUG)
     inline namespace print_helpers
     {
         STATIC_INLINE void print_ldr_entry_ctx(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx)
@@ -745,9 +731,10 @@ namespace NT
             constexpr PebLdrOrder const order = PebLdrOrder::memory;
             auto const* head = GetPebLdrListHead(order);
             auto const* ldrentry = GetLdrDataTableEntry(head, order);
+            // Return handle for the module that created the process
             return (HMODULE)ldrentry->DllBase;
         }
-        UNICODE_STRING usMod{0, 0, 0};
+        UNICODE_STRING usMod{};
         ntdll::RtlInitUnicodeString(&usMod, DllName);
         HMODULE hMod = GetModHandleByBaseName(usMod);
         if (!hMod)
@@ -758,17 +745,11 @@ namespace NT
         return hMod;
     }
 
-// unreliable in managed processes (mscoree takes its place when run from VSUnit), needs to be reviewed thoroughly
-// (FIXME/TODO)
-#if 0
     STATIC_INLINE HMODULE GetKernel32()
     {
-        constexpr PebLdrOrder const order = PebLdrOrder::memory;
-        auto const* head = GetPebLdrListHead(order);
-        auto const* ldrentry = GetLdrDataTableEntry(head->Flink->Flink, order);
-        return (HMODULE)ldrentry->DllBase;
+        constexpr UNICODE_STRING const usKernel32 NTPEBLDR_LITERAL_UNICODE_STRING(L"kernel32.dll");
+        return (HMODULE)GetModHandleByBaseName(usKernel32);
     }
-#endif // 0
 
     STATIC_INLINE HMODULE GetNtDll()
     {
