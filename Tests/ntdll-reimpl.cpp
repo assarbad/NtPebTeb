@@ -51,17 +51,17 @@ TEST_F(Ntdll, RtlCompareUnicodeString)
         ASSERT_EQ(ours, theirs) << "Expected our and their implementation to match!";
     };
 
-    UNICODE_STRING const foo = NT::InitUnicodeString(L"foo");
-    UNICODE_STRING const foobar = NT::InitUnicodeString(L"foobar");
-    UNICODE_STRING const bar = NT::InitUnicodeString(L"bar");
+    UNICODE_STRING const foo = NT::InitString(L"foo");
+    UNICODE_STRING const foobar = NT::InitString(L"foobar");
+    UNICODE_STRING const bar = NT::InitString(L"bar");
 
     testComparison(&foo, &foo, FALSE, [](auto x) { return x == 0; });
     testComparison(&foo, &foobar, FALSE, [](auto x) { return x < 0; });
     testComparison(&foo, &bar, FALSE, [](auto x) { return x > 0; });
 
-    UNICODE_STRING const FOO = NT::InitUnicodeString(L"FOO");
-    UNICODE_STRING const FOOBAR = NT::InitUnicodeString(L"FOOBAR");
-    UNICODE_STRING const BAR = NT::InitUnicodeString(L"BAR");
+    UNICODE_STRING const FOO = NT::InitString(L"FOO");
+    UNICODE_STRING const FOOBAR = NT::InitString(L"FOOBAR");
+    UNICODE_STRING const BAR = NT::InitString(L"BAR");
 
     testComparison(&foo, &FOO, TRUE, [](auto x) { return x == 0; });
     testComparison(&foo, &FOOBAR, TRUE, [](auto x) { return x < 0; });

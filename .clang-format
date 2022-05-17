@@ -5,16 +5,16 @@ Language: Cpp
 BasedOnStyle: Microsoft
 Standard: c++17
 AlignAfterOpenBracket: Align
-# Requires clang-format 12
 AlignConsecutiveMacros: AcrossEmptyLinesAndComments
 AlignEscapedNewlinesLeft: true
 AllowShortFunctionsOnASingleLine: false
 BinPackArguments: false
 BinPackParameters: false
-ColumnLimit: 120
+ColumnLimit: 160
 IndentCaseLabels: false
 IndentCaseBlocks: true
 PointerAlignment: Left
+SortIncludes: false
 SpaceAfterCStyleCast: false
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeParens: ControlStatements

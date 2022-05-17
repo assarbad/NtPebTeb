@@ -33,7 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
-#define __NTPEBLDR_H_VER__ 2022051621
+#define __NTPEBLDR_H_VER__ 2022051720
 #if (defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP)
 #    pragma once
 #endif // Check for "#pragma once" support
@@ -103,8 +103,7 @@ namespace NT
         PVOID EntryPointActivationContext;
         PVOID Lock;
     } LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
-    static_assert(offsetof(LDR_DATA_TABLE_ENTRY, DllBase) == 3 * sizeof(LIST_ENTRY),
-                  "DllBase offset has unexpected value");
+    static_assert(offsetof(LDR_DATA_TABLE_ENTRY, DllBase) == 3 * sizeof(LIST_ENTRY), "DllBase offset has unexpected value");
 
     typedef struct
     {
@@ -145,10 +144,8 @@ namespace NT
         } LDR_DATA_TABLE_ENTRY;
     } // namespace Glue
     static_assert(sizeof(Glue::LDR_DATA_TABLE_ENTRY) == sizeof(LDR_DATA_TABLE_ENTRY), "These two must match");
-    static_assert(offsetof(LDR_DATA_TABLE_ENTRY, Flags) == offsetof(Glue::LDR_DATA_TABLE_ENTRY, tail.real.Flags),
-                  "DllBase offset has unexpected value");
-    static_assert(offsetof(Glue::LDR_DATA_TABLE_ENTRY, tail.context.Flags) ==
-                      offsetof(Glue::LDR_DATA_TABLE_ENTRY, tail.real.Flags),
+    static_assert(offsetof(LDR_DATA_TABLE_ENTRY, Flags) == offsetof(Glue::LDR_DATA_TABLE_ENTRY, tail.real.Flags), "DllBase offset has unexpected value");
+    static_assert(offsetof(Glue::LDR_DATA_TABLE_ENTRY, tail.context.Flags) == offsetof(Glue::LDR_DATA_TABLE_ENTRY, tail.real.Flags),
                   "DllBase offset has unexpected value");
 
     typedef struct _PEB_LDR_DATA
@@ -163,6 +160,24 @@ namespace NT
         BOOLEAN ShutdownInProgress;
         HANDLE ShutdownThreadId;
     } PEB_LDR_DATA, *PPEB_LDR_DATA;
+
+    template <typename> struct NTSTRING
+    {
+    };
+    template <> struct NTSTRING<WCHAR>
+    {
+        typedef UNICODE_STRING type;
+        typedef WCHAR char_type;
+    };
+    template <> struct NTSTRING<CHAR>
+    {
+        typedef ANSI_STRING type;
+        typedef CHAR char_type;
+    };
+
+    // Just to avoid pulling in type_traits header for this
+    template <typename, typename> constexpr bool is_same_v = false;
+    template <typename T> constexpr bool is_same_v<T, T> = true;
 
     inline namespace ntdll
     {
@@ -295,45 +310,86 @@ namespace NT
             int (*tolower_)(int) = tolower;
             int (*toupper_)(int) = toupper;
 #endif
-        } // namespace crt
 
-        // This is not exactly optimized, but should be a halfway faithful implementation of the original functionality
-        STATIC_INLINE LONG RtlCompareUnicodeString(PCUNICODE_STRING String1,
-                                                   PCUNICODE_STRING String2,
-                                                   BOOLEAN CaseInSensitive)
-        {
-            PCWSTR pwstr1 = String1->Buffer;
-            PCWSTR pwstr2 = String2->Buffer;
-            LONG const len1 = String1->Length >> 1; // number of WCHAR
-            LONG const len2 = String2->Length >> 1; // number of WCHAR
-            LONG const minlen = (len1 <= len2) ? len1 : len2;
-
-            if (CaseInSensitive)
+            template <typename CHARTYPE> STATIC_INLINE CHARTYPE toupper(CHARTYPE ch)
             {
-                for (LONG idx = 0; idx < minlen; idx++)
+                if constexpr (is_same_v<CHARTYPE, WCHAR>)
                 {
-                    if (pwstr1[idx] != pwstr2[idx])
+                    return (CHARTYPE)towupper_((CHARTYPE)ch);
+                }
+                else if constexpr (is_same_v<CHARTYPE, CHAR>)
+                {
+                    return (CHARTYPE)toupper_((CHARTYPE)ch);
+                }
+                else
+                {
+                    static_assert(false, "Not supported for whatever character type this is");
+                }
+            }
+
+            template <typename CHARTYPE> STATIC_INLINE CHARTYPE tolower(CHARTYPE ch)
+            {
+                if constexpr (is_same_v<CHARTYPE, WCHAR>)
+                {
+                    return (CHARTYPE)towlower_((CHARTYPE)ch);
+                }
+                else if constexpr (is_same_v<CHARTYPE, CHAR>)
+                {
+                    return (CHARTYPE)tolower_((CHARTYPE)ch);
+                }
+                else
+                {
+                    static_assert(false, "Not supported for whatever character type this is");
+                }
+            }
+
+            // This is not exactly optimized, but should be a halfway faithful implementation of the original functionality
+            template <typename CHARTYPE, typename STRTYPE = typename NTSTRING<CHARTYPE>::type>
+            STATIC_INLINE LONG CompareString(STRTYPE const& String1, STRTYPE const& String2, BOOLEAN CaseInSensitive)
+            {
+                CHARTYPE* str1 = String1.Buffer;
+                CHARTYPE* str2 = String2.Buffer;
+                LONG const len1 = String1.Length / sizeof(CHARTYPE);
+                LONG const len2 = String2.Length / sizeof(CHARTYPE);
+                LONG const minlen = (len1 <= len2) ? len1 : len2;
+
+                if (CaseInSensitive)
+                {
+                    for (LONG idx = 0; idx < minlen; idx++)
                     {
-                        auto const c1 = ntdll::crt::towupper_(pwstr1[idx]);
-                        auto const c2 = ntdll::crt::towupper_(pwstr2[idx]);
-                        if (c1 != c2)
+                        if (str1[idx] != str2[idx])
                         {
-                            return (LONG)c1 - (LONG)c2;
+                            auto const c1 = toupper(str1[idx]);
+                            auto const c2 = toupper(str2[idx]);
+                            if (c1 != c2)
+                            {
+                                return (LONG)c1 - (LONG)c2;
+                            }
                         }
                     }
                 }
-            }
-            else
-            {
-                for (LONG idx = 0; idx < minlen; idx++)
+                else
                 {
-                    if (pwstr1[idx] != pwstr2[idx])
+                    for (LONG idx = 0; idx < minlen; idx++)
                     {
-                        return (LONG)pwstr1[idx] - (LONG)pwstr2[idx];
+                        if (str1[idx] != str2[idx])
+                        {
+                            return (LONG)str1[idx] - (LONG)str2[idx];
+                        }
                     }
                 }
+                return len1 - len2;
             }
-            return len1 - len2;
+        } // namespace crt
+
+        STATIC_INLINE LONG RtlCompareUnicodeString(PCUNICODE_STRING String1, PCUNICODE_STRING String2, BOOLEAN CaseInSensitive)
+        {
+            return crt::CompareString<WCHAR>(*String1, *String2, CaseInSensitive);
+        }
+
+        STATIC_INLINE LONG RtlCompareString(PCANSI_STRING String1, PCANSI_STRING String2, BOOLEAN CaseInSensitive)
+        {
+            return crt::CompareString<CHAR>(*String1, *String2, CaseInSensitive);
         }
 
         // This is not exactly optimized, but should be a halfway faithful implementation of the original functionality
@@ -354,12 +410,35 @@ namespace NT
         }
     } // namespace ntdll
 
-    template <typename T, size_t Length>
-    STATIC_INLINE constexpr UNICODE_STRING const InitUnicodeString(T const (&str)[Length])
+    inline namespace util
     {
-        static_assert(Length == sizeof(str) / sizeof(str[0]), "Well, crap ...");
-        return {sizeof(str) - sizeof(str[0]), sizeof(str), const_cast<PWSTR>(&str[0])};
-    }
+        template <typename T, size_t Length> STATIC_INLINE constexpr typename NTSTRING<T>::type const InitString(T const (&str)[Length])
+        {
+            static_assert(Length == sizeof(str) / sizeof(str[0]), "Well, crap ...");
+            return {sizeof(str) - sizeof(str[0]), sizeof(str), const_cast<T*>(&str[0])};
+        }
+
+        template <typename CHARTYPE, size_t Length, typename STRTYPE = typename NTSTRING<CHARTYPE>::type>
+        constexpr STATIC_INLINE size_t StringEndsWith(STRTYPE const& String, CHARTYPE const (&Suffix)[Length], BOOLEAN CaseInSensitive = TRUE)
+        {
+            STRTYPE const sSuffix = InitString(Suffix);
+            size_t const Offset = (String.Length / sizeof(String.Buffer[0])) - (Length - 1);
+            STRTYPE const sSuspectedSuffix = {sSuffix.Length, sSuffix.MaximumLength, &String.Buffer[Offset]};
+            return (0 == ntdll::crt::CompareString<CHARTYPE>(sSuffix, sSuspectedSuffix, CaseInSensitive)) ? Offset : 0;
+        }
+
+        template <typename CHARTYPE, size_t Length, typename STRTYPE = typename NTSTRING<CHARTYPE>::type>
+        constexpr STATIC_INLINE typename STRTYPE TruncateStringAt(STRTYPE const& String, CHARTYPE const (&Suffix)[Length], BOOLEAN CaseInSensitive = TRUE)
+        {
+            auto const Offset = StringEndsWith(String, Suffix, CaseInSensitive);
+            if (!Offset)
+            {
+                return String;
+            }
+            STRTYPE const sRetVal = {((USHORT)Offset) * sizeof(CHARTYPE), String.MaximumLength, String.Buffer};
+            return sRetVal;
+        }
+    } // namespace util
 
     STATIC_INLINE PEB_LDR_DATA* GetPebLdr()
     {
@@ -416,8 +495,7 @@ namespace NT
         return nullptr;
     }
 
-    STATIC_INLINE LDR_DATA_TABLE_ENTRY_CTX const* GetLdrDataTableEntryPredicateContext(LIST_ENTRY const* current,
-                                                                                       PebLdrOrder order)
+    STATIC_INLINE LDR_DATA_TABLE_ENTRY_CTX const* GetLdrDataTableEntryPredicateContext(LIST_ENTRY const* current, PebLdrOrder order)
     {
         auto const* entry = GetLdrDataTableEntry(current, order);
         if (entry)
@@ -434,9 +512,7 @@ namespace NT
         using func_t = NTSTATUS(CALLBACK*)(NT::LDR_DATA_TABLE_ENTRY_CTX const&, T&);
     };
 
-    template <typename T>
-    STATIC_INLINE NTSTATUS IteratePebLdrDataTable(typename callback<T>::func_t predicate,
-                                                  typename callback<T>::data_t& context)
+    template <typename T> STATIC_INLINE NTSTATUS IteratePebLdrDataTable(typename callback<T>::func_t predicate, typename callback<T>::data_t& context)
     {
         constexpr PebLdrOrder const order = callback<T>::order;
         auto const* first = GetPebLdrListHead(order);
@@ -507,13 +583,8 @@ namespace NT
                 auto const* e = GetLdrDataTableEntryPredicateContext(current, order);
                 if (e && e->DllBase && e->SizeOfImage && e->BaseDllName.Buffer && e->FullDllName.Buffer)
                 {
-                    _tprintf(_T("    [% 2u] @%p, %wZ: s = %u, f = 0x%08X, ep = @%p\n"),
-                             idx,
-                             e->DllBase,
-                             &e->BaseDllName,
-                             e->SizeOfImage,
-                             e->Flags,
-                             e->EntryPoint);
+                    _tprintf(
+                        _T("    [% 2u] @%p, %wZ: s = %u, f = 0x%08X, ep = @%p\n"), idx, e->DllBase, &e->BaseDllName, e->SizeOfImage, e->Flags, e->EntryPoint);
                     if (bShowFullName)
                     {
                         _tprintf(_T("         %wZ\n"), &e->FullDllName);
@@ -577,8 +648,7 @@ namespace NT
                     }
                     if (data.Address)
                     {
-                        if (data.DllBase &&
-                            (ldrctx.DllBase != data.DllBase)) // If we were passed a module, does it match?
+                        if (data.DllBase && (ldrctx.DllBase != data.DllBase)) // If we were passed a module, does it match?
                         {
                             return STATUS_NOT_FOUND; // Nope, so return failure early (will proceed to next ldr entry)
                         }
@@ -623,8 +693,7 @@ namespace NT
                 UNICODE_STRING const& usMod; // could be name or path
             } MapByUnicodeString;
 
-            STATIC_INLINE NTSTATUS CALLBACK MapByBaseDllNamePredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx,
-                                                                      MapByUnicodeString& data)
+            STATIC_INLINE NTSTATUS CALLBACK MapByBaseDllNamePredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx, MapByUnicodeString& data)
             {
                 auto const& DllName = ldrctx.BaseDllName;
                 if (ldrctx.DllBase && ldrctx.SizeOfImage && DllName.Buffer && DllName.Length)
@@ -634,12 +703,20 @@ namespace NT
                         data.hMod = (HMODULE)ldrctx.DllBase;
                         return STATUS_SUCCESS;
                     }
+                    UNICODE_STRING const usTruncDllName = TruncateStringAt(DllName, L".dll");
+                    if (usTruncDllName.Length != DllName.Length) // small optimization
+                    {
+                        if (0 == ntdll::RtlCompareUnicodeString(&data.usMod, &usTruncDllName, TRUE))
+                        {
+                            data.hMod = (HMODULE)ldrctx.DllBase;
+                            return STATUS_SUCCESS;
+                        }
+                    }
                 }
                 return STATUS_NOT_FOUND;
             }
 
-            STATIC_INLINE NTSTATUS CALLBACK MapByFullDllNamePredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx,
-                                                                      MapByUnicodeString& data)
+            STATIC_INLINE NTSTATUS CALLBACK MapByFullDllNamePredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx, MapByUnicodeString& data)
             {
 
                 auto const& DllName = ldrctx.FullDllName;
@@ -654,8 +731,7 @@ namespace NT
                 return STATUS_NOT_FOUND;
             }
 
-            template <typename CTX, typename callback<CTX>::func_t Predicate>
-            STATIC_INLINE HMODULE GetModHandle(UNICODE_STRING const& DllName)
+            template <typename CTX, typename callback<CTX>::func_t Predicate> STATIC_INLINE HMODULE GetModHandle(UNICODE_STRING const& DllName)
             {
                 CTX context = {nullptr, DllName};
                 NTSTATUS Status = IteratePebLdrDataTable<CTX>(Predicate, context);

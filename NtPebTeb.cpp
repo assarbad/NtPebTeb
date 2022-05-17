@@ -48,7 +48,10 @@ int _tmain(int, _TCHAR**)
     _tprintf(_T("SystemRoot = %ws\n"), NT::SystemRoot);
     _tprintf(_T("NT = %u.%u (arch: %u)\n"), NT::MajorVersion, NT::MinorVersion, NT::NativeProcessorArchitecture);
     _ASSERTE(NT::GetNtDll() == ::GetModuleHandleW(L"ntdll.dll"));
-    _tprintf(_T("Module #2 kernel32: 0x%08p\n"), NT::GetNtDll());
+    _ASSERTE(NT::GetNtDll() == ::GetModuleHandleW(L"ntdll"));
+    _ASSERTE(NT::GetKernel32() == ::GetModuleHandleW(L"kernel32.dll"));
+    _ASSERTE(NT::GetKernel32() == ::GetModuleHandleW(L"kernel32"));
+    _tprintf(_T("Module #2 ntdll   : 0x%08p\n"), NT::GetNtDll());
     auto* ldrdata = NT::GetPebLdr();
     if (ldrdata)
     {
@@ -56,7 +59,7 @@ int _tmain(int, _TCHAR**)
         print_ldr_data(*ldrdata);
 #endif // _DEBUG
 
-        auto const* name = L"kernelbase.dll";
+        WCHAR const name[] = L"kernelbase.dll";
         HMODULE hMod = NT::GetModuleHandleW(name);
         _ASSERTE(hMod == ::GetModuleHandleW(name));
 
