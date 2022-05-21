@@ -32,14 +32,14 @@ solution ("NtPebTeb")
             "*.manifest",
             "*.cmd", "*.txt", "*.md", "*.rst", "premake4.lua",
             "*.manifest", "*.props", "*.ruleset", ".editorconfig", ".clang-format",
-            ".*ignore",
+            ".gitignore", ".hgignore",
         }
 
         vpaths
         {
-            ["Header Files/*"] = { "*.h" },
-            ["Source Files/*"] = { "*.cpp" },
-            ["Special Files/*"] = { "**.cmd", "premake4.lua", "**.manifest", ".*ignore" },
+            ["Special Files/*"] = { "**.cmd", "premake4.lua", "**.manifest", ".gitignore", ".hgignore" },
+            ["Header Files/*"] = { "*.h", "*.hpp", },
+            ["Source Files/*"] = { "*.cpp", },
         }
 
         configuration {"Debug"}
