@@ -56,7 +56,13 @@
 #ifndef NTPEBLDR_NAIVE_CRT_INLINES
 #    define NTPEBLDR_NAIVE_CRT_INLINES 1
 #endif
-#define STATIC_INLINE static inline
+#ifndef STATIC_INLINE
+#    ifdef _MSC_VER
+#        define STATIC_INLINE static __forceinline
+#    else
+#        define STATIC_INLINE static inline
+#    endif // _MSC_VER
+#endif     // STATIC_INLINE
 #if !NTPEBLDR_NAIVE_CRT_INLINES
 #    include <cstdio> // towupper/towlower et. al.
 #endif
@@ -170,6 +176,16 @@ namespace NT
         typedef WCHAR char_type;
     };
     template <> struct NTSTRING<CHAR>
+    {
+        typedef ANSI_STRING type;
+        typedef CHAR char_type;
+    };
+    template <> struct NTSTRING<UNICODE_STRING>
+    {
+        typedef UNICODE_STRING type;
+        typedef WCHAR char_type;
+    };
+    template <> struct NTSTRING<ANSI_STRING>
     {
         typedef ANSI_STRING type;
         typedef CHAR char_type;
@@ -344,9 +360,9 @@ namespace NT
             }
 
             // This is not exactly optimized, but should be a halfway faithful implementation of the original functionality
-            template <typename CHARTYPE, typename STRTYPE = typename NTSTRING<CHARTYPE>::type>
-            STATIC_INLINE LONG CompareString(STRTYPE const& String1, STRTYPE const& String2, BOOLEAN CaseInSensitive)
+            template <typename STRTYPE> STATIC_INLINE LONG CompareString(STRTYPE const& String1, STRTYPE const& String2, BOOLEAN CaseInSensitive)
             {
+                using CHARTYPE = typename NTSTRING<STRTYPE>::char_type;
                 CHARTYPE* str1 = String1.Buffer;
                 CHARTYPE* str2 = String2.Buffer;
                 LONG const len1 = String1.Length / sizeof(CHARTYPE);
@@ -384,12 +400,12 @@ namespace NT
 
         STATIC_INLINE LONG RtlCompareUnicodeString(PCUNICODE_STRING String1, PCUNICODE_STRING String2, BOOLEAN CaseInSensitive)
         {
-            return crt::CompareString<WCHAR>(*String1, *String2, CaseInSensitive);
+            return crt::CompareString(*String1, *String2, CaseInSensitive);
         }
 
         STATIC_INLINE LONG RtlCompareString(PCANSI_STRING String1, PCANSI_STRING String2, BOOLEAN CaseInSensitive)
         {
-            return crt::CompareString<CHAR>(*String1, *String2, CaseInSensitive);
+            return crt::CompareString(*String1, *String2, CaseInSensitive);
         }
 
         // This is not exactly optimized, but should be a halfway faithful implementation of the original functionality
@@ -418,26 +434,39 @@ namespace NT
             return {sizeof(str) - sizeof(str[0]), sizeof(str), const_cast<T*>(&str[0])};
         }
 
+        template <typename STRTYPE> constexpr STATIC_INLINE size_t StringEndsWith(STRTYPE const& String, STRTYPE const& Suffix, BOOLEAN CaseInSensitive = TRUE)
+        {
+            size_t const Offset = (String.Length / sizeof(String.Buffer[0])) - (Suffix.Length / sizeof(Suffix.Buffer[0]));
+            STRTYPE const sSuspectedSuffix = {Suffix.Length, Suffix.MaximumLength, &String.Buffer[Offset]};
+            return (0 == ntdll::crt::CompareString(Suffix, sSuspectedSuffix, CaseInSensitive)) ? Offset : 0;
+        }
+
         template <typename CHARTYPE, size_t Length, typename STRTYPE = typename NTSTRING<CHARTYPE>::type>
         constexpr STATIC_INLINE size_t StringEndsWith(STRTYPE const& String, CHARTYPE const (&Suffix)[Length], BOOLEAN CaseInSensitive = TRUE)
         {
             STRTYPE const sSuffix = InitString(Suffix);
-            size_t const Offset = (String.Length / sizeof(String.Buffer[0])) - (Length - 1);
-            STRTYPE const sSuspectedSuffix = {sSuffix.Length, sSuffix.MaximumLength, &String.Buffer[Offset]};
-            return (0 == ntdll::crt::CompareString<CHARTYPE>(sSuffix, sSuspectedSuffix, CaseInSensitive)) ? Offset : 0;
+            return StringEndsWith(String, sSuffix, CaseInSensitive);
         }
 
-        template <typename CHARTYPE, size_t Length, typename STRTYPE = typename NTSTRING<CHARTYPE>::type>
-        constexpr STATIC_INLINE typename STRTYPE TruncateStringAt(STRTYPE const& String, CHARTYPE const (&Suffix)[Length], BOOLEAN CaseInSensitive = TRUE)
+        template <typename STRTYPE>
+        constexpr STATIC_INLINE typename STRTYPE TruncateStringAt(STRTYPE const& String, STRTYPE const& Suffix, BOOLEAN CaseInSensitive = TRUE)
         {
             auto const Offset = StringEndsWith(String, Suffix, CaseInSensitive);
             if (!Offset)
             {
                 return String;
             }
-            STRTYPE const sRetVal = {((USHORT)Offset) * sizeof(CHARTYPE), String.MaximumLength, String.Buffer};
+            STRTYPE const sRetVal = {((USHORT)Offset) * sizeof(String.Buffer[0]), String.MaximumLength, String.Buffer};
             return sRetVal;
         }
+
+        template <typename CHARTYPE, size_t Length, typename STRTYPE = typename NTSTRING<CHARTYPE>::type>
+        constexpr STATIC_INLINE typename STRTYPE TruncateStringAt(STRTYPE const& String, CHARTYPE const (&Suffix)[Length], BOOLEAN CaseInSensitive = TRUE)
+        {
+            STRTYPE const sSuffix = InitString(Suffix);
+            return TruncateStringAt(String, sSuffix, CaseInSensitive);
+        }
+
     } // namespace util
 
     STATIC_INLINE PEB_LDR_DATA* GetPebLdr()
@@ -622,6 +651,37 @@ namespace NT
     } // namespace print_helpers
 #endif
 
+    STATIC_INLINE NT::LDR_DATA_TABLE_ENTRY const* GetNtDllEntry()
+    {
+        constexpr PebLdrOrder const order = PebLdrOrder::memory;
+        auto const* head = GetPebLdrListHead(order);
+        if (head)
+        {
+            return GetLdrDataTableEntry(head->Flink, order);
+        }
+        return nullptr;
+    }
+
+    STATIC_INLINE HMODULE GetNtDll()
+    {
+        auto const* ldrentry = GetNtDllEntry();
+        if (ldrentry)
+        {
+            return (HMODULE)ldrentry->DllBase;
+        }
+        return nullptr;
+    }
+
+    STATIC_INLINE UNICODE_STRING GetNtDllDirectory()
+    {
+        auto const* ntdll = GetNtDllEntry();
+        if (ntdll)
+        {
+            return TruncateStringAt(ntdll->FullDllName, ntdll->BaseDllName, TRUE);
+        }
+        return {};
+    }
+
     namespace predefined_helpers
     {
         namespace by_trait
@@ -693,6 +753,36 @@ namespace NT
                 UNICODE_STRING const& usMod; // could be name or path
             } MapByUnicodeString;
 
+#ifdef NTPEBLDR_UNDERHANDED
+            namespace
+            {
+                template <size_t Length> STATIC_INLINE void InitDllExt(WCHAR (&DllExt)[Length])
+                {
+                    constexpr WCHAR NtDllName[] = L"ntdll.dll";
+                    auto const* ntdll = GetNtDllEntry();
+                    if (!ntdll)
+                    {
+                        return;
+                    }
+                    UNICODE_STRING const& usNtDll = ntdll->BaseDllName;
+                    size_t const nLength = usNtDll.Length / 2; // this length does NOT include the terminating zero
+                    auto const* BaseName = usNtDll.Buffer;
+                    auto const& Dot = BaseName[5];
+                    if ((nLength == _countof(NtDllName) - 1) && (Dot == L'.'))
+                    {
+                        for (size_t idx = 1; idx < _countof(DllExt) - 1; idx++)
+                        {
+                            if (NT::crt::toupper(BaseName[1 + idx]) == NT::crt::toupper(BaseName[5 + idx]))
+                            {
+                                DllExt[idx] = NT::crt::tolower(BaseName[1 + idx]);
+                            }
+                        }
+                        DllExt[0] = Dot;
+                    }
+                }
+            } // namespace
+#endif        // NTPEBLDR_UNDERHANDED
+
             STATIC_INLINE NTSTATUS CALLBACK MapByBaseDllNamePredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx, MapByUnicodeString& data)
             {
                 auto const& DllName = ldrctx.BaseDllName;
@@ -703,7 +793,21 @@ namespace NT
                         data.hMod = (HMODULE)ldrctx.DllBase;
                         return STATUS_SUCCESS;
                     }
-                    UNICODE_STRING const usTruncDllName = TruncateStringAt(DllName, L".dll");
+#ifdef NTPEBLDR_UNDERHANDED
+                    static WCHAR DllExt[5]{};
+                    if (!DllExt[0])
+                    {
+                        InitDllExt(DllExt);
+                    }
+                    if (!DllExt[0])
+                    {
+                        return STATUS_NOT_FOUND;
+                    }
+#else  // NTPEBLDR_UNDERHANDED
+                    constexpr WCHAR const DllExt[] = L".dll";
+#endif // NTPEBLDR_UNDERHANDED
+                    static_assert(_countof(DllExt) == 5, "Must fit exactly '.dll\\0'");
+                    UNICODE_STRING const usTruncDllName = TruncateStringAt(DllName, DllExt);
                     if (usTruncDllName.Length != DllName.Length) // small optimization
                     {
                         if (0 == ntdll::RtlCompareUnicodeString(&data.usMod, &usTruncDllName, TRUE))
@@ -816,7 +920,6 @@ namespace NT
         if (!hMod)
         {
             hMod = GetModHandleByFullName(usMod);
-            // TBD: further logic to deal with missing .dll suffix needed?
         }
         return hMod;
     }
@@ -825,14 +928,6 @@ namespace NT
     {
         constexpr UNICODE_STRING const usKernel32 NTPEBLDR_LITERAL_UNICODE_STRING(L"kernel32.dll");
         return (HMODULE)GetModHandleByBaseName(usKernel32);
-    }
-
-    STATIC_INLINE HMODULE GetNtDll()
-    {
-        constexpr PebLdrOrder const order = PebLdrOrder::memory;
-        auto const* head = GetPebLdrListHead(order);
-        auto const* ldrentry = GetLdrDataTableEntry(head->Flink, order);
-        return (HMODULE)ldrentry->DllBase;
     }
 
     STATIC_INLINE IMAGE_DATA_DIRECTORY const GetDataDirectory(IMAGE_NT_HEADERS64 const* nthdrs, DWORD datadir_index)

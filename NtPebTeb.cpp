@@ -41,6 +41,7 @@
         } while (0)
 #endif // _DEBUG
 
+#define NTPEBLDR_UNDERHANDED
 #include "ntpebldr.h"
 
 int _tmain(int, _TCHAR**)
@@ -52,6 +53,7 @@ int _tmain(int, _TCHAR**)
     _ASSERTE(NT::GetKernel32() == ::GetModuleHandleW(L"kernel32.dll"));
     _ASSERTE(NT::GetKernel32() == ::GetModuleHandleW(L"kernel32"));
     _tprintf(_T("Module #2 ntdll   : 0x%08p\n"), NT::GetNtDll());
+    _tprintf(_T("\t-> %wZ\n"), NT::GetNtDllDirectory());
     auto* ldrdata = NT::GetPebLdr();
     if (ldrdata)
     {
