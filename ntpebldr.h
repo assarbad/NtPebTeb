@@ -37,6 +37,11 @@
 #if (defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP)
 #    pragma once
 #endif // Check for "#pragma once" support
+#if defined(__cplusplus) && defined(_MSVC_LANG) && (__cplusplus == 199711L)
+static_assert(_MSVC_LANG >= 201703L, "This header expects a C++17 compatible compiler.");
+#else
+static_assert(__cplusplus >= 201703L, "This header expects a C++17 compatible compiler.");
+#endif
 #if defined(WIN32_NO_STATUS)
 #    undef _NTSTATUS_
 #    undef WIN32_NO_STATUS
@@ -167,6 +172,84 @@ namespace NT
         HANDLE ShutdownThreadId;
     } PEB_LDR_DATA, *PPEB_LDR_DATA;
 
+    typedef struct // xref: http://terminus.rewolf.pl/terminus/structures/ntdll/_TEB_combined.html
+    {
+        NT_TIB NtTib;
+        PVOID EnvironmentPointer;
+        CLIENT_ID ClientId;
+        PVOID ActiveRpcHandle;
+        PVOID ThreadLocalStoragePointer;
+        PPEB ProcessEnvironmentBlock;
+
+        ULONG LastErrorValue;
+        ULONG CountOfOwnedCriticalSections;
+        PVOID CsrClientThread;
+        PVOID Win32ThreadInfo;
+        ULONG User32Reserved[26];
+        ULONG UserReserved[5];
+        PVOID WOW32Reserved;
+        LCID CurrentLocale;
+        ULONG FpSoftwareStatusRegister;
+        PVOID ReservedForDebuggerInstrumentation[16];
+        PVOID SystemReserved1[38];
+        NTSTATUS ExceptionCode;
+#ifdef _M_X64
+        ULONG UnknownAndDontCare[0x55D];
+#elif defined(_M_IX86)
+        ULONG UnknownAndDontCare[0x396];
+#endif // _M_X64
+       // Padding up to size 0x1838
+    } TEB, *PTEB;
+#ifdef _M_X64
+    static_assert(sizeof(TEB) == 0x1838, "Expected size to be a fixed, known value");
+#elif defined(_M_IX86)
+    static_assert(sizeof(TEB) == 0x1000, "Expected size to be a fixed, known value");
+#endif // _M_X64
+
+#pragma warning(disable : 4201)
+    typedef struct // xref: http://terminus.rewolf.pl/terminus/structures/ntdll/_PEB_combined.html
+    {
+        BOOLEAN InheritedAddressSpace;
+        BOOLEAN ReadImageFileExecOptions;
+        BOOLEAN BeingDebugged;
+        union
+        {
+            BOOLEAN BitField;
+            struct
+            {
+                BOOLEAN ImageUsesLargePages : 1;
+                BOOLEAN IsProtectedProcess : 1;
+                BOOLEAN IsImageDynamicallyRelocated : 1;
+                BOOLEAN SkipPatchingUser32Forwarders : 1;
+                BOOLEAN IsPackagedProcess : 1;
+                BOOLEAN IsAppContainer : 1;
+                BOOLEAN IsProtectedProcessLight : 1;
+                BOOLEAN IsLongPathAwareProcess : 1;
+            };
+        };
+        HANDLE Mutant;
+        PVOID ImageBaseAddress;
+        PPEB_LDR_DATA Ldr;
+        PRTL_USER_PROCESS_PARAMETERS ProcessParameters;
+        PVOID SubSystemData;
+        PVOID ProcessHeap;
+        PRTL_CRITICAL_SECTION FastPebLock;
+        PSLIST_HEADER AtlThunkSListPtr;
+        // Everything from here down has been copied from winternl.h for now
+        PVOID Reserved5;
+        ULONG Reserved6;
+        PVOID Reserved7;
+        ULONG Reserved8;
+        ULONG AtlThunkSListPtr32;
+        PVOID Reserved9[45];
+        BYTE Reserved10[96];
+        PPS_POST_PROCESS_INIT_ROUTINE PostProcessInitRoutine;
+        BYTE Reserved11[128];
+        PVOID Reserved12[1];
+        ULONG SessionId;
+    } PEB, *PPEB;
+#pragma warning(default : 4201)
+
     template <typename> struct NTSTRING
     {
     };
@@ -197,7 +280,6 @@ namespace NT
 
     inline namespace ntdll
     {
-
         STATIC_INLINE TEB* NtCurrentTeb()
         {
 #if defined(_WIN64) && defined(_M_X64)
@@ -424,6 +506,19 @@ namespace NT
                 DestinationString->Length = DestinationString->MaximumLength = 0;
             }
         }
+
+        STATIC_INLINE DWORD RtlGetLastWin32Error()
+        {
+            auto const* pdwLastError = (DWORD*)((byte*)&NtCurrentTeb()->ProcessEnvironmentBlock + sizeof(PVOID));
+            return *pdwLastError;
+        }
+
+        STATIC_INLINE void RtlSetLastWin32Error(DWORD LastError) // the real implementation does a little more, and includes a debug helper
+        {
+            auto* pdwLastError = (DWORD*)((byte*)&NtCurrentTeb()->ProcessEnvironmentBlock + sizeof(PVOID));
+            *pdwLastError = LastError;
+        }
+
     } // namespace ntdll
 
     inline namespace util
@@ -456,7 +551,9 @@ namespace NT
             {
                 return String;
             }
-            STRTYPE const sRetVal = {((USHORT)Offset) * sizeof(String.Buffer[0]), String.MaximumLength, String.Buffer};
+            USHORT const NewLength = (USHORT)((USHORT)Offset * sizeof(String.Buffer[0]));
+            USHORT const Difference = (String.Length - NewLength);
+            STRTYPE const sRetVal = {NewLength, (USHORT)(String.MaximumLength - Difference), String.Buffer};
             return sRetVal;
         }
 
