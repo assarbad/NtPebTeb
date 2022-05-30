@@ -33,7 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
-#define __NTPEBLDR_H_VER__ 2022053006
+#define __NTPEBLDR_H_VER__ 2022053020
 #if !NTPEBLDR_NO_PRAGMA_ONCE && ((defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP))
 #    pragma once
 #endif
@@ -259,24 +259,26 @@ namespace NT
     };
     template <> struct NTSTRING<WCHAR>
     {
-        typedef UNICODE_STRING type;
+        typedef UNICODE_STRING string_type;
         typedef WCHAR char_type;
     };
     template <> struct NTSTRING<CHAR>
     {
-        typedef ANSI_STRING type;
+        typedef ANSI_STRING string_type;
         typedef CHAR char_type;
     };
     template <> struct NTSTRING<UNICODE_STRING>
     {
-        typedef UNICODE_STRING type;
+        typedef UNICODE_STRING string_type;
         typedef WCHAR char_type;
     };
     template <> struct NTSTRING<ANSI_STRING>
     {
-        typedef ANSI_STRING type;
+        typedef ANSI_STRING string_type;
         typedef CHAR char_type;
     };
+    template <typename T> using strchar_t = typename NTSTRING<T>::char_type;
+    template <typename T> using strtype_t = typename NTSTRING<T>::string_type;
 
     // Just to avoid pulling in type_traits header for this
     template <typename, typename> constexpr bool is_same_v = false;
@@ -448,7 +450,7 @@ namespace NT
             // This is not exactly optimized, but should be a halfway faithful implementation of the original functionality
             template <typename STRTYPE> STATIC_INLINE LONG CompareString(STRTYPE const& String1, STRTYPE const& String2, BOOLEAN CaseInSensitive)
             {
-                using CHARTYPE = typename NTSTRING<STRTYPE>::char_type;
+                using CHARTYPE = strchar_t<STRTYPE>;
                 CHARTYPE* str1 = String1.Buffer;
                 CHARTYPE* str2 = String2.Buffer;
                 LONG const len1 = String1.Length / sizeof(CHARTYPE);
@@ -535,10 +537,16 @@ namespace NT
 
     inline namespace util
     {
-        template <typename T, size_t Length> STATIC_INLINE constexpr typename NTSTRING<T>::type const InitString(T const (&str)[Length])
+        template <typename CHARTYPE, size_t MaxLength>
+        STATIC_INLINE constexpr strtype_t<CHARTYPE> const InitString(CHARTYPE const (&str)[MaxLength], USHORT ActualLength)
         {
-            static_assert(Length == sizeof(str) / sizeof(str[0]), "Well, crap ...");
-            return {sizeof(str) - sizeof(str[0]), sizeof(str), const_cast<T*>(&str[0])};
+            static_assert(MaxLength == sizeof(str) / sizeof(str[0]), "Well, crap ...");
+            return {ActualLength, sizeof(str), const_cast<CHARTYPE*>(&str[0])};
+        }
+
+        template <typename CHARTYPE, size_t MaxLength> STATIC_INLINE constexpr strtype_t<CHARTYPE> const InitString(CHARTYPE const (&str)[MaxLength])
+        {
+            return InitString(str, sizeof(str) - sizeof(str[0]));
         }
 
         template <typename STRTYPE> constexpr STATIC_INLINE size_t StringEndsWith(STRTYPE const& String, STRTYPE const& Suffix, BOOLEAN CaseInSensitive = TRUE)
@@ -548,7 +556,7 @@ namespace NT
             return (0 == ntdll::crt::CompareString(Suffix, sSuspectedSuffix, CaseInSensitive)) ? Offset : 0;
         }
 
-        template <typename CHARTYPE, size_t Length, typename STRTYPE = typename NTSTRING<CHARTYPE>::type>
+        template <typename CHARTYPE, size_t Length, typename STRTYPE = strtype_t<CHARTYPE>>
         constexpr STATIC_INLINE size_t StringEndsWith(STRTYPE const& String, CHARTYPE const (&Suffix)[Length], BOOLEAN CaseInSensitive = TRUE)
         {
             STRTYPE const sSuffix = InitString(Suffix);
@@ -556,7 +564,7 @@ namespace NT
         }
 
         template <typename STRTYPE>
-        constexpr STATIC_INLINE typename STRTYPE TruncateStringAt(STRTYPE const& String, STRTYPE const& Suffix, BOOLEAN CaseInSensitive = TRUE)
+        constexpr STATIC_INLINE STRTYPE TruncateStringAt(STRTYPE const& String, STRTYPE const& Suffix, BOOLEAN CaseInSensitive = TRUE)
         {
             auto const Offset = StringEndsWith(String, Suffix, CaseInSensitive);
             if (!Offset)
@@ -569,8 +577,8 @@ namespace NT
             return sRetVal;
         }
 
-        template <typename CHARTYPE, size_t Length, typename STRTYPE = typename NTSTRING<CHARTYPE>::type>
-        constexpr STATIC_INLINE typename STRTYPE TruncateStringAt(STRTYPE const& String, CHARTYPE const (&Suffix)[Length], BOOLEAN CaseInSensitive = TRUE)
+        template <typename CHARTYPE, size_t Length, typename STRTYPE = strtype_t<CHARTYPE>>
+        constexpr STATIC_INLINE STRTYPE TruncateStringAt(STRTYPE const& String, CHARTYPE const (&Suffix)[Length], BOOLEAN CaseInSensitive = TRUE)
         {
             STRTYPE const sSuffix = InitString(Suffix);
             return TruncateStringAt(String, sSuffix, CaseInSensitive);
@@ -650,7 +658,10 @@ namespace NT
         using func_t = NTSTATUS(CALLBACK*)(NT::LDR_DATA_TABLE_ENTRY_CTX const&, T&);
     };
 
-    template <typename T> STATIC_INLINE NTSTATUS IteratePebLdrDataTable(typename callback<T>::func_t predicate, typename callback<T>::data_t& context)
+    template <typename T> using cbfunc_t = typename callback<T>::func_t;
+    template <typename T> using cbdata_t = typename callback<T>::data_t;
+
+    template <typename T> STATIC_INLINE NTSTATUS IteratePebLdrDataTable(cbfunc_t<T> predicate, cbdata_t<T>& context)
     {
         constexpr PebLdrOrder const order = callback<T>::order;
         auto const* first = GetPebLdrListHead(order);
@@ -944,7 +955,7 @@ namespace NT
                 return STATUS_NOT_FOUND;
             }
 
-            template <typename CTX, typename callback<CTX>::func_t Predicate> STATIC_INLINE HMODULE GetModHandle(UNICODE_STRING const& DllName)
+            template <typename CTX, cbfunc_t<CTX> Predicate> STATIC_INLINE HMODULE GetModHandle(UNICODE_STRING const& DllName)
             {
                 CTX context = {nullptr, DllName};
                 NTSTATUS Status = IteratePebLdrDataTable<CTX>(Predicate, context);
