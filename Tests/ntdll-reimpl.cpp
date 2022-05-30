@@ -18,6 +18,9 @@ namespace
 class Ntdll : public ::testing::Test
 {
   protected:
+#if NTPEBLDR_LOCAL_PEBTEB_STRUCT
+    using PEB = NT::PEB;
+#endif // NTPEBLDR_LOCAL_PEBTEB_STRUCT
     HMODULE hNtdll = nullptr;
     LONG(NTAPI* RtlCompareUnicodeString)(PCUNICODE_STRING, PCUNICODE_STRING, BOOLEAN) = nullptr;
     VOID(NTAPI* RtlInitUnicodeString)(PUNICODE_STRING, LPCWSTR) = nullptr;
