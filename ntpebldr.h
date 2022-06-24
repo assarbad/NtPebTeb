@@ -33,7 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
-#define __NTPEBLDR_H_VER__ 2022053020
+#define __NTPEBLDR_H_VER__ 2022062420
 #if !NTPEBLDR_NO_PRAGMA_ONCE && ((defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP))
 #    pragma once
 #endif
@@ -415,6 +415,8 @@ namespace NT
             int (*toupper_)(int) = toupper;
 #endif
 
+            template <class...> constexpr bool always_false_v = false;
+
             template <typename CHARTYPE> STATIC_INLINE CHARTYPE toupper(CHARTYPE ch)
             {
                 if constexpr (is_same_v<CHARTYPE, WCHAR>)
@@ -427,7 +429,7 @@ namespace NT
                 }
                 else
                 {
-                    static_assert(false, "Not supported for whatever character type this is");
+                    static_assert(always_false_v<CHARTYPE>, "Not supported for whatever character type this is");
                 }
             }
 
@@ -443,7 +445,7 @@ namespace NT
                 }
                 else
                 {
-                    static_assert(false, "Not supported for whatever character type this is");
+                    static_assert(always_false_v<CHARTYPE>, "Not supported for whatever character type this is");
                 }
             }
 
