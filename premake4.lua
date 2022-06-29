@@ -110,6 +110,7 @@ do
         ['<OutputFile>$(OutDir)%s</OutputFile>'] = 0,
         ['<AdditionalLibraryDirectories>%s;%%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>'] = 0,
         ['<WarningLevel>Level3</WarningLevel>'] = 0,
+        ['<SmallerTypeCheck>true</SmallerTypeCheck>'] = 0,
     }
     -- Embed the property sheet
     _G.override_vcxproj = function(prj, orig_p, indent, msg, first, ...)
@@ -404,7 +405,7 @@ do
     remove_allowed_optionvalues("os") -- ... , { bsd = 0, haiku = 0, linux = 0, macosx = 0, solaris = 0, }
     remove_allowed_optionvalues("cc")
     -- ... and actions (mainly because they are untested)
-    for k,v in pairs({codeblocks = 0, codelite = 0, gmake = 0, xcode3 = 0, xcode4 = 0, vs2002 = 0, vs2003 = 0, vs2005 = 0, vs2008 = 0, vs2010 = 0, vs2012 = 0, vs2013 = 0}) do
+    for k,v in pairs({codeblocks = 0, codelite = 0, gmake = 0, xcode3 = 0, xcode4 = 0, vs2002 = 0, vs2003 = 0, vs2005 = 0, vs2008 = 0, vs2010 = 0, vs2012 = 0, vs2013 = 0, vs2015 = 0}) do
         remove_action(k)
     end
 end
