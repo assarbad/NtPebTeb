@@ -6,3 +6,4 @@ hgid.h
 **.user
 TestResults/
 **.bak
+BuildCommandLines.log
