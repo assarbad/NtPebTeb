@@ -6,4 +6,5 @@ hgid.h
 **.user
 TestResults/
 **.bak
-BuildCommandLines.log
+BuildCommandLines*.log
+sccache/
