@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="LogBuild;EnableSccache">
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="LogBuild">
 	<PropertyGroup>
 		<ThisProjectBuildLogFileName Condition="'$(MSBuildProjectName)' == ''">$(MSBuildThisFileDirectory)BuildCommandLines.log</ThisProjectBuildLogFileName>
 		<ThisProjectBuildLogFileName Condition="'$(MSBuildProjectName)' != ''">$(MSBuildThisFileDirectory)BuildCommandLines-$(MSBuildProjectName).log</ThisProjectBuildLogFileName>
@@ -9,57 +9,5 @@
 		<Message Text="Setting LOG_BUILD_COMMANDLINES='$(ThisProjectBuildLogFileName)'" />
 		<SetEnv Name="LOG_BUILD_COMMANDLINES" Value="$(ThisProjectBuildLogFileName)" Prefix="false" />
 		<SetEnv Name="PreferredToolArchitecture" Value="$(PreferredToolArchitecture)" Prefix="false" />
-	</Target>
-	<Target Name="FindSccacheExecutableInPath">
-		<PropertyGroup>
-			<ExecutableToFind>sccache.exe</ExecutableToFind>
-		</PropertyGroup>
-		<ItemGroup>
-			<ExecPaths Include="$([System.Environment]::GetEnvironmentVariable('PATH').Split(';'))" />
-			<FilteredExecPaths Include="@(ExecPaths)" Condition="exists('%(FullPath)\$(ExecutableToFind)')" />
-			<FilteredExecPaths Include="@(FilteredExecPaths->Reverse())" Condition="exists('%(FullPath)\$(ExecutableToFind)')" />
-		</ItemGroup>
-		<PropertyGroup>
-			<SccacheExecutableFullPath Condition="'%(FilteredExecPaths.Identity)' != ''">%(FilteredExecPaths.Identity)\$(ExecutableToFind)</SccacheExecutableFullPath>
-			<SccacheExecutableFullPath Condition="'%(FilteredExecPaths.Identity)' == ''"></SccacheExecutableFullPath>
-		</PropertyGroup>
-	</Target>
-	<Target Name="DetectSccacheVersion" DependsOnTargets="FindSccacheExecutableInPath">
-		<Exec Command="&quot;$(SccacheExecutableFullPath)&quot; --version" EchoOff="true" ConsoleToMsBuild="true">
-			<Output TaskParameter="ConsoleOutput" PropertyName="SccacheVersion" />
-		</Exec>
-		<Message Importance="high" Text="sccache version = '$(SccacheVersion)'" />
-	</Target>
-	<Target Name="EnableSccache" DependsOnTargets="DetectSccacheVersion">
-		<PropertyGroup>
-			<CompileCacheDir>$(MsbuildThisFileDirectory)sccache\</CompileCacheDir>
-			<CompileCacheActualCacheDir>$(CompileCacheDir)cache\</CompileCacheActualCacheDir>
-			<CompileCacheWrapperBinDir>$(CompileCacheDir)bin\</CompileCacheWrapperBinDir>
-			<CLToolPath>$(CompileCacheDir)bin</CLToolPath>
-		</PropertyGroup>
-		<SetEnv Name="SCCACHE_DETECTED" Value="$(SccacheExecutableFullPath)" Prefix="false" />
-		<SetEnv Name="SCCACHE_DIR" Value="$(CompileCacheActualCacheDir)" Prefix="false" />
-		<SetEnv Name="SCCACHE_ERROR_LOG" Value="$(CompileCacheDir)sccache.log" Prefix="false" />
-		<SetEnv Name="SCCACHE_LOG" Value="debug" Prefix="false" />
-		<SetEnv Name="SCCACHE_CONF" Value="$(CompileCacheDir)sccache.conf" Prefix="false" />
-		<!--SetEnv Name="SCCACHE_START_SERVER" Value="1" Prefix="false" /-->
-		<!--SetEnv Name="SCCACHE_RECACHE" Value="1" Prefix="false" /-->
-		<!--SetEnv Name="SCCACHE_NO_DAEMON" Value="1" Prefix="false" /-->
-		<ItemGroup>
-			<WrapperBinaries Include="$(CompileCacheWrapperBinDir)cl.exe" />
-			<WrapperBinaries Include="$(CompileCacheWrapperBinDir)clang-cl.exe" />
-			<SourceBinaries Include="$(SccacheExecutableFullPath)" />
-			<SourceBinaries Include="$(SccacheExecutableFullPath)" />
-		</ItemGroup>
-		<MakeDir Directories="$(CompileCacheDir);$(CompileCacheActualCacheDir);$(CompileCacheWrapperBinDir)" />
-		<Copy SourceFiles="@(SourceBinaries)" DestinationFiles="@(WrapperBinaries)" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" />
-		<SetEnv Name="PATH" Value="$(CompileCacheWrapperBinDir);@(ExecPaths)" Prefix="false" />
-		<Message Importance="high" Text="PATH = '$(PATH)'" />
-		<Message Importance="high" Text="SCCACHE_ERROR_LOG = '$(SCCACHE_ERROR_LOG)'" />
-		<Message Importance="high" Text="SCCACHE_DIR = '$(SCCACHE_DIR)'" />
-		<Message Importance="high" Text="%24(CompileCacheDir) = '$(CompileCacheActualCacheDir)'" />
-		<Message Importance="high" Text="%24(CompileCacheActualCacheDir) = '$(CompileCacheActualCacheDir)'" />
-		<Message Importance="high" Text="%24(CompileCacheWrapperBinDir) = '$(CompileCacheWrapperBinDir)'" />
-		<Message Importance="high" Text="%24(SccacheExecutableFullPath) = '$(SccacheExecutableFullPath)'" />
 	</Target>
 </Project>
