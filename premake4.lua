@@ -31,7 +31,7 @@ solution ("NtPebTeb")
             "*.hpp",
             "*.manifest",
             "*.cmd", "*.txt", "*.md", "*.rst", "premake4.lua",
-            "*.manifest", "*.props", "*.ruleset", ".editorconfig", ".clang-format",
+            "*.manifest", "*.props", "*.targets", "*.ruleset", ".editorconfig", ".clang-format",
             ".gitignore", ".hgignore",
         }
 

@@ -143,6 +143,7 @@
     <None Include="README.md" />
     <None Include="premake4.lua" />
     <None Include="project.props" />
+    <None Include="Directory.Build.targets" />
     <None Include=".editorconfig" />
     <None Include=".clang-format" />
     <None Include=".gitignore" />

@@ -17,6 +17,7 @@
       <Filter>Special Files</Filter>
     </None>
     <None Include="project.props" />
+    <None Include="Directory.Build.targets" />
     <None Include=".editorconfig" />
     <None Include=".clang-format" />
     <None Include=".gitignore">
