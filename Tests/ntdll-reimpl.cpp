@@ -96,6 +96,8 @@ TEST_F(Ntdll, GetNtDll)
 {
     ASSERT_TRUE(NT::GetNtDll() != nullptr);
     ASSERT_EQ(NT::GetNtDll(), ::GetModuleHandleW(L"ntdll.dll"));
+    ASSERT_EQ(NT::GetNtDll(), NT::GetModHandleByLoadOrderIndex(1));
+    ASSERT_EQ(NT::GetNtDll(), NT::GetModHandleByInitializationOrderIndex(0));
 }
 
 TEST_F(Ntdll, GetPebLdr)

@@ -4,7 +4,7 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// Copyright (c) 2021 Oliver Schneider (assarbad.net)
+/// Copyright (c) 2021, 2023 Oliver Schneider (assarbad.net)
 ///
 /// Permission is hereby granted, free of charge, to any person obtaining a
 /// copy of this software and associated documentation files (the "Software"),
@@ -49,7 +49,7 @@
 
 using NT::PebLdrOrder;
 
-NTSTATUS CALLBACK printcb(NT::LDR_DATA_TABLE_ENTRY_CTX const& ldrctx, ULONG&) // not using the ULONG at all
+NTSTATUS CALLBACK printcb(NT::LDR_DATA_TABLE_ENTRY_CTX const& ldrctx, NT::LDR_DATA_TABLE_ENTRY const* /*ldrdataentry*/, ULONG&) // not using the ULONG at all
 {
     print_ldr_entry_ctx(ldrctx);
     return STATUS_NOT_FOUND;
@@ -74,7 +74,11 @@ template <PebLdrOrder order_v = PebLdrOrder::load> void showPebLdrData()
 {
     ULONG ctx{};
     wprintf(L"%s\n", GetPebLdrOrderName(order_v));
-    NT::IteratePebLdrDataTable<ULONG, order_v>(printcb, ctx);
+    NTSTATUS Status = NT::IteratePebLdrDataTable<ULONG, order_v>(printcb, ctx);
+    if (STATUS_NO_MORE_ENTRIES != Status)
+    {
+        wprintf(L"  WARNING: got NT status %08X when we expected %08X\n", Status, STATUS_NO_MORE_ENTRIES);
+    }
 }
 
 int wmain(int, wchar_t**)
@@ -83,6 +87,8 @@ int wmain(int, wchar_t**)
     wprintf(L"NT = %u.%u (arch: %u)\n", NT::MajorVersion, NT::MinorVersion, NT::NativeProcessorArchitecture);
     _ASSERTE(NT::GetNtDll() == ::GetModuleHandleW(L"ntdll.dll"));
     _ASSERTE(NT::GetNtDll() == ::GetModuleHandleW(L"ntdll"));
+    _ASSERTE(NT::GetNtDll() == NT::GetModHandleByLoadOrderIndex(1));
+    _ASSERTE(NT::GetNtDll() == NT::GetModHandleByInitializationOrderIndex(0));
     _ASSERTE(NT::GetKernel32() == ::GetModuleHandleW(L"kernel32.dll"));
     _ASSERTE(NT::GetKernel32() == ::GetModuleHandleW(L"kernel32"));
     wprintf(L"Module #2 ntdll   : 0x%08p\n", NT::GetNtDll());

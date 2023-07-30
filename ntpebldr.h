@@ -34,7 +34,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
-#define __NTPEBLDR_H_VER__ 2023073021
+#define __NTPEBLDR_H_VER__ 2023073022
 #if !NTPEBLDR_NO_PRAGMA_ONCE && ((defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP))
 #    pragma once
 #endif
@@ -658,7 +658,7 @@ namespace NT
     {
         static PebLdrOrder const order = order_v;
         using data_t = T;
-        using func_t = NTSTATUS(CALLBACK*)(NT::LDR_DATA_TABLE_ENTRY_CTX const&, T&);
+        using func_t = NTSTATUS(CALLBACK*)(LDR_DATA_TABLE_ENTRY_CTX const&, LDR_DATA_TABLE_ENTRY const*, T&);
     };
 
     template <typename T, PebLdrOrder order_v> using cbfunc_t = typename callback<T, order_v>::func_t;
@@ -679,8 +679,9 @@ namespace NT
         do
         {
             auto const* tblentry = GetLdrDataTableEntryPredicateContext(current, order);
+            auto const* curr_entry = GetLdrDataTableEntry(current, order);
             NTSTATUS Status;
-            if (STATUS_NOT_FOUND != (Status = predicate(*tblentry, context)))
+            if (STATUS_NOT_FOUND != (Status = predicate(*tblentry, curr_entry, context)))
             {
                 return Status;
             }
@@ -692,11 +693,9 @@ namespace NT
 #if defined(NTPEBLDR_PRINT_FUNCS) || defined(_DEBUG)
     inline namespace print_helpers
     {
-        STATIC_INLINE void print_ldr_entry_ctx(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx, bool skip_terminator=true)
+        STATIC_INLINE void print_ldr_entry_ctx(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx, bool skip_terminator = true)
         {
-            if (skip_terminator && !ldrctx.DllBase && !ldrctx.SizeOfImage && !ldrctx.EntryPoint && !ldrctx.Flags && !ldrctx.BaseDllName.Buffer &&
-                !ldrctx.BaseDllName.Length && !ldrctx.BaseDllName.MaximumLength && !ldrctx.FullDllName.Buffer && !ldrctx.FullDllName.Length &&
-                !ldrctx.FullDllName.MaximumLength)
+            if (skip_terminator && !ldrctx.DllBase && !ldrctx.SizeOfImage && !ldrctx.EntryPoint && !ldrctx.Flags && !ldrctx.BaseDllName.Buffer)
             {
                 return;
             }
@@ -783,7 +782,7 @@ namespace NT
 
     STATIC_INLINE NT::LDR_DATA_TABLE_ENTRY const* GetNtDllEntry()
     {
-        constexpr PebLdrOrder const order = PebLdrOrder::memory;
+        constexpr PebLdrOrder const order = PebLdrOrder::load;
         auto const* head = GetPebLdrListHead(order);
         if (head)
         {
@@ -814,6 +813,53 @@ namespace NT
 
     namespace predefined_helpers
     {
+        namespace by_order
+        {
+            typedef struct _MapByOrder
+            {
+                ULONG IndexToBeIncremented; // incremented inside the callback
+                ULONG IndexToLookFor;
+                PVOID DllBase;
+                LDR_DATA_TABLE_ENTRY const* LdrDataTableEntry;
+            } MapByOrder;
+
+            STATIC_INLINE NTSTATUS CALLBACK MapOrderPredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx,
+                                                              LDR_DATA_TABLE_ENTRY const* ldrdataentry,
+                                                              MapByOrder& data)
+            {
+                if (ldrctx.DllBase && ldrctx.SizeOfImage && (data.IndexToLookFor == data.IndexToBeIncremented))
+                {
+                    data.DllBase = ldrctx.DllBase;
+                    data.LdrDataTableEntry = ldrdataentry;
+                    return STATUS_SUCCESS;
+                }
+                data.IndexToBeIncremented++;
+                return STATUS_NOT_FOUND;
+            }
+
+            template <PebLdrOrder order_v = PebLdrOrder::load> STATIC_INLINE HMODULE GetModHandleByOrderIndex(ULONG Index)
+            {
+                MapByOrder context = {0, Index, nullptr, nullptr};
+                NTSTATUS Status = IteratePebLdrDataTable<MapByOrder, order_v>(MapOrderPredicate, context);
+                if (NT_SUCCESS(Status))
+                {
+                    return (HMODULE)context.DllBase;
+                }
+                return nullptr;
+            }
+
+            template <PebLdrOrder order_v = PebLdrOrder::load> STATIC_INLINE LDR_DATA_TABLE_ENTRY const* GetLdrDataEntryByOrderIndex(ULONG Index)
+            {
+                MapByOrder context = {0, Index, nullptr, nullptr};
+                NTSTATUS Status = IteratePebLdrDataTable<MapByOrder, order_v>(MapOrderPredicate, context);
+                if (NT_SUCCESS(Status))
+                {
+                    return context.LdrDataTableEntry;
+                }
+                return nullptr;
+            }
+        } // namespace by_order
+
         namespace by_trait
         {
             typedef struct _MapByTrait
@@ -824,7 +870,9 @@ namespace NT
                 ULONG SizeOfImage;
             } MapByTrait;
 
-            STATIC_INLINE NTSTATUS CALLBACK MapTraitPredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx, MapByTrait& data)
+            STATIC_INLINE NTSTATUS CALLBACK MapTraitPredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx,
+                                                              LDR_DATA_TABLE_ENTRY const* /*ldrdataentry*/,
+                                                              MapByTrait& data)
             {
                 if (ldrctx.DllBase && ldrctx.SizeOfImage && (data.Address || data.DllBase))
                 {
@@ -913,7 +961,9 @@ namespace NT
             } // namespace
 #endif        // NTPEBLDR_UNDERHANDED
 
-            STATIC_INLINE NTSTATUS CALLBACK MapByBaseDllNamePredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx, MapByUnicodeString& data)
+            STATIC_INLINE NTSTATUS CALLBACK MapByBaseDllNamePredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx,
+                                                                      LDR_DATA_TABLE_ENTRY const* /*ldrdataentry*/,
+                                                                      MapByUnicodeString& data)
             {
                 auto const& DllName = ldrctx.BaseDllName;
                 if (ldrctx.DllBase && ldrctx.SizeOfImage && DllName.Buffer && DllName.Length)
@@ -950,7 +1000,9 @@ namespace NT
                 return STATUS_NOT_FOUND;
             }
 
-            STATIC_INLINE NTSTATUS CALLBACK MapByFullDllNamePredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx, MapByUnicodeString& data)
+            STATIC_INLINE NTSTATUS CALLBACK MapByFullDllNamePredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx,
+                                                                      LDR_DATA_TABLE_ENTRY const* /*ldrdataentry*/,
+                                                                      MapByUnicodeString& data)
             {
 
                 auto const& DllName = ldrctx.FullDllName;
@@ -1019,8 +1071,40 @@ namespace NT
             return nthdrs;
         }
     } // namespace predefined_helpers
-    using predefined_helpers::by_string::MapByUnicodeString;
-    using predefined_helpers::by_trait::MapByTrait;
+
+    STATIC_INLINE LDR_DATA_TABLE_ENTRY const* GetLdrDataEntryByLoadOrderIndex(ULONG Index)
+    {
+        using namespace predefined_helpers::by_order;
+        return GetLdrDataEntryByOrderIndex<PebLdrOrder::load>(Index);
+    }
+
+    STATIC_INLINE LDR_DATA_TABLE_ENTRY const* GetLdrDataEntryByMemoryOrderIndex(ULONG Index)
+    {
+        using namespace predefined_helpers::by_order;
+        return GetLdrDataEntryByOrderIndex<PebLdrOrder::memory>(Index);
+    }
+
+    STATIC_INLINE LDR_DATA_TABLE_ENTRY const* GetLdrDataEntryByInitializationOrderIndex(ULONG Index)
+    {
+        using namespace predefined_helpers::by_order;
+        return GetLdrDataEntryByOrderIndex<PebLdrOrder::init>(Index);
+    }
+
+    STATIC_INLINE HMODULE GetModHandleByLoadOrderIndex(ULONG Index)
+    {
+        using namespace predefined_helpers::by_order;
+        return GetModHandleByOrderIndex<PebLdrOrder::load>(Index);
+    }
+    STATIC_INLINE HMODULE GetModHandleByMemoryOrderIndex(ULONG Index)
+    {
+        using namespace predefined_helpers::by_order;
+        return GetModHandleByOrderIndex<PebLdrOrder::memory>(Index);
+    }
+    STATIC_INLINE HMODULE GetModHandleByInitializationOrderIndex(ULONG Index)
+    {
+        using namespace predefined_helpers::by_order;
+        return GetModHandleByOrderIndex<PebLdrOrder::init>(Index);
+    }
 
     STATIC_INLINE HMODULE GetModHandleByBaseName(UNICODE_STRING const& DllName)
     {
