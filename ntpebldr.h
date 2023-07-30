@@ -4,7 +4,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2021, 2022 Oliver Schneider (assarbad.net)
+// Copyright (c) 2021-2023 Oliver Schneider (assarbad.net)
 //
 // Permission is hereby granted, free of charge, to any person or organization
 // obtaining a copy of the software and accompanying documentation covered by
@@ -34,7 +34,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
-#define __NTPEBLDR_H_VER__ 2022062420
+#define __NTPEBLDR_H_VER__ 2023073021
 #if !NTPEBLDR_NO_PRAGMA_ONCE && ((defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP))
 #    pragma once
 #endif
@@ -654,19 +654,20 @@ namespace NT
         return nullptr;
     }
 
-    template <typename T, PebLdrOrder order_v = PebLdrOrder::load> struct callback
+    template <typename T, PebLdrOrder order_v> struct callback
     {
         static PebLdrOrder const order = order_v;
         using data_t = T;
         using func_t = NTSTATUS(CALLBACK*)(NT::LDR_DATA_TABLE_ENTRY_CTX const&, T&);
     };
 
-    template <typename T> using cbfunc_t = typename callback<T>::func_t;
-    template <typename T> using cbdata_t = typename callback<T>::data_t;
+    template <typename T, PebLdrOrder order_v> using cbfunc_t = typename callback<T, order_v>::func_t;
+    template <typename T, PebLdrOrder order_v> using cbdata_t = typename callback<T, order_v>::data_t;
 
-    template <typename T> STATIC_INLINE NTSTATUS IteratePebLdrDataTable(cbfunc_t<T> predicate, cbdata_t<T>& context)
+    template <typename T, PebLdrOrder order_v = PebLdrOrder::load>
+    STATIC_INLINE NTSTATUS IteratePebLdrDataTable(cbfunc_t<T, order_v> predicate, cbdata_t<T, order_v>& context)
     {
-        constexpr PebLdrOrder const order = callback<T>::order;
+        constexpr PebLdrOrder const order = callback<T, order_v>::order;
         auto const* first = GetPebLdrListHead(order);
 
         if (!first)
@@ -691,8 +692,14 @@ namespace NT
 #if defined(NTPEBLDR_PRINT_FUNCS) || defined(_DEBUG)
     inline namespace print_helpers
     {
-        STATIC_INLINE void print_ldr_entry_ctx(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx)
+        STATIC_INLINE void print_ldr_entry_ctx(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx, bool skip_terminator=true)
         {
+            if (skip_terminator && !ldrctx.DllBase && !ldrctx.SizeOfImage && !ldrctx.EntryPoint && !ldrctx.Flags && !ldrctx.BaseDllName.Buffer &&
+                !ldrctx.BaseDllName.Length && !ldrctx.BaseDllName.MaximumLength && !ldrctx.FullDllName.Buffer && !ldrctx.FullDllName.Length &&
+                !ldrctx.FullDllName.MaximumLength)
+            {
+                return;
+            }
             _tprintf(_T("  PVOID DllBase = @%p;\n"), ldrctx.DllBase);
             _tprintf(_T("  PVOID EntryPoint = @%p;\n"), ldrctx.EntryPoint);
             _tprintf(_T("  ULONG SizeOfImage = %u (0x%08X);\n"), ldrctx.SizeOfImage, ldrctx.SizeOfImage);
@@ -958,7 +965,7 @@ namespace NT
                 return STATUS_NOT_FOUND;
             }
 
-            template <typename CTX, cbfunc_t<CTX> Predicate> STATIC_INLINE HMODULE GetModHandle(UNICODE_STRING const& DllName)
+            template <typename CTX, cbfunc_t<CTX, PebLdrOrder::load> Predicate> STATIC_INLINE HMODULE GetModHandle(UNICODE_STRING const& DllName)
             {
                 CTX context = {nullptr, DllName};
                 NTSTATUS Status = IteratePebLdrDataTable<CTX>(Predicate, context);
