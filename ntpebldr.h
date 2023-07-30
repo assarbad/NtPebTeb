@@ -76,7 +76,7 @@ static_assert(__cplusplus >= 201703L, "This header expects a C++17 compatible co
 #    include <cstdio> // towupper/towlower et. al.
 #endif
 #include <cstddef> // offsetof etc
-#ifdef _DEBUG
+#if defined(NTPEBLDR_PRINT_FUNCS) || defined(_DEBUG)
 #    include <tchar.h>
 #endif // _DEBUG
 
