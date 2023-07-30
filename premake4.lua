@@ -9,6 +9,8 @@
           https://github.com/windirstat/premake-stable
           https://sourceforge.net/projects/windirstat/files/premake-stable/
           https://osdn.net/projects/windirstat/storage/historical/premake-stable/
+
+// SPDX-License-Identifier: Unlicense
   ]]
 local action = _ACTION or ""
 

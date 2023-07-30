@@ -30,6 +30,8 @@
 //
 // [Boost Software License - Version 1.0 - August 17th, 2003]
 //
+// SPDX-License-Identifier: BSL-1.0
+//
 ///////////////////////////////////////////////////////////////////////////////
 // http://terminus.rewolf.pl/terminus/
 // http://undocumented.ntinternals.net

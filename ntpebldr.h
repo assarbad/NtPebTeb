@@ -30,6 +30,7 @@
 //
 // [Boost Software License - Version 1.0 - August 17th, 2003]
 //
+// SPDX-License-Identifier: BSL-1.0
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
