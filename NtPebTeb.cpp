@@ -92,7 +92,7 @@ int wmain(int, wchar_t**)
     _ASSERTE(NT::GetKernel32() == ::GetModuleHandleW(L"kernel32.dll"));
     _ASSERTE(NT::GetKernel32() == ::GetModuleHandleW(L"kernel32"));
     wprintf(L"Module #2 ntdll   : 0x%08p\n", NT::GetNtDll());
-    wprintf(L"\t-> %wZ\n", NT::GetNtDllDirectory());
+    wprintf(L"\t-> %wZ\n", NT::GetNtDllDirectory()); //-V510
     auto* ldrdata = NT::GetPebLdr();
     if (ldrdata)
     {

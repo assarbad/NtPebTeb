@@ -6,6 +6,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_NO_STATUS
 #include <Windows.h>
+#include <array>
 #include <cstring>
 #include <tchar.h>
 #include <tuple>
@@ -22,7 +23,7 @@ namespace
 
 using NT::byte;
 using std::wstring;
-using strvec = std::vector<wstring>;
+using strvec = std::array<wstring>;
 
 class KernelBase : public ::testing::Test
 {
@@ -58,19 +59,27 @@ using NameOrdVec = std::vector<DllNameOrdinal>;
 using DllMap = std::map<std::wstring, NameOrdVec>;
 
 // Helper function to populate our DLL map
-NameOrdVec RetrieveExportsByDllName(std::wstring dll)
+NameOrdVec RetrieveExportsByDllName(std::wstring const& dll)
 {
     using namespace NT::predefined_helpers;
+    NameOrdVec retval;
     SCOPED_TRACE(dll.c_str());
     HMODULE hMod = NT::GetModuleHandleW(dll.c_str());
+    if (!hMod)
+    {
+        return retval;
+    }
     auto const traits = by_trait::GetModTraits(hMod);
     auto const* expdir = NT::GetExportDirectory(hMod);
+    if (!expdir)
+    {
+        return retval;
+    }
     auto const* const mod = (byte*)hMod;
     auto const* const modBeyond = mod + traits.SizeOfImage;
     auto const* const rvaNames = (ULONG*)&mod[expdir->AddressOfNames];
     auto const* const rvaNameOrdinals = (USHORT*)&mod[expdir->AddressOfNameOrdinals];
     // auto const* const rvaFunctions = (ULONG*)&mod[expdir->AddressOfFunctions];
-    NameOrdVec retval;
     // We have an upper estimate, so let's optimize
     retval.reserve(expdir->NumberOfFunctions);
     // auto const* const modname = (char*)&mod[expdir->Name];
@@ -129,6 +138,6 @@ TEST_P(LdrFuncs, GetProcAddr)
 
 auto GetLdrFuncTestName = [](testing::TestParamInfo<DllNameOrdinal> const& info) { return std::get<2>(info.param); };
 
-INSTANTIATE_TEST_SUITE_P(ntdll, LdrFuncs, testing::ValuesIn(dllmap[L"ntdll.dll"]), GetLdrFuncTestName);
-INSTANTIATE_TEST_SUITE_P(kernelbase, LdrFuncs, testing::ValuesIn(dllmap[L"kernelbase.dll"]), GetLdrFuncTestName);
-INSTANTIATE_TEST_SUITE_P(kernel32, LdrFuncs, testing::ValuesIn(dllmap[L"kernel32.dll"]), GetLdrFuncTestName);
+INSTANTIATE_TEST_SUITE_P(ntdll, LdrFuncs, testing::ValuesIn(dllmap[L"ntdll.dll"]), GetLdrFuncTestName); //-V808
+INSTANTIATE_TEST_SUITE_P(kernelbase, LdrFuncs, testing::ValuesIn(dllmap[L"kernelbase.dll"]), GetLdrFuncTestName); //-V808
+INSTANTIATE_TEST_SUITE_P(kernel32, LdrFuncs, testing::ValuesIn(dllmap[L"kernel32.dll"]), GetLdrFuncTestName); //-V808

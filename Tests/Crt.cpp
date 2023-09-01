@@ -39,7 +39,7 @@ namespace
     TEST(Crt, strncmp)
     {
         ASSERT_EQ(NT::ntdll::crt::strncmp_(nullptr, nullptr, 123), 0);
-        ASSERT_EQ(NT::ntdll::crt::strncmp_("123", "234", 0), 0);
+        ASSERT_EQ(NT::ntdll::crt::strncmp_("123", "234", 0), 0); //-V666
 
         ASSERT_LT(NT::ntdll::crt::strncmp_("123", "234", 3), 0);
         ASSERT_LT(NT::ntdll::crt::strncmp_("123", "abc", 3), 0);
@@ -51,7 +51,7 @@ namespace
     TEST(Crt, wcsncmp)
     {
         ASSERT_EQ(NT::ntdll::crt::wcsncmp_(nullptr, nullptr, 123), 0);
-        ASSERT_EQ(NT::ntdll::crt::wcsncmp_(L"123", L"234", 0), 0);
+        ASSERT_EQ(NT::ntdll::crt::wcsncmp_(L"123", L"234", 0), 0); //-V666
 
         ASSERT_LT(NT::ntdll::crt::wcsncmp_(L"123", L"234", 3), 0);
         ASSERT_LT(NT::ntdll::crt::wcsncmp_(L"123", L"abc", 3), 0);
