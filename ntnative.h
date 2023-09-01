@@ -149,9 +149,10 @@
 #   pragma warning(default:4201)
 #   pragma pop_macro("NTSYSCALLAPI")
 #endif // DDKBUILD
+#pragma warning(push)
 #pragma warning(disable:4005)
 #include <ntstatus.h>
-#pragma warning(default:4005)
+#pragma warning(pop)
 
 #if defined(DDKBUILD)
 #   if defined(__cplusplus)
@@ -543,6 +544,7 @@ typedef struct _SECTIONBASICINFO {
     LARGE_INTEGER MaximumSize;
 } SECTION_BASIC_INFORMATION, *PSECTION_BASIC_INFORMATION;
 
+#pragma warning(push)
 #pragma warning(disable:4201 4214)
 typedef struct _SECTION_IMAGE_INFORMATION {
     PVOID TransferAddress;
@@ -571,7 +573,7 @@ typedef struct _SECTION_IMAGE_INFORMATION {
     ULONG ImageFileSize;
     ULONG CheckSum;
 } SECTION_IMAGE_INFORMATION, *PSECTION_IMAGE_INFORMATION;
-#pragma warning(default:4201 4214)
+#pragma warning(pop)
 
 typedef struct _SEMAPHORE_BASIC_INFORMATION {
     ULONG CurrentCount;
@@ -1587,6 +1589,7 @@ typedef ULONG (NTAPI *RtlUniform_t)(PULONG);
 #define ZwCreateKey NtCreateKey
 #define ZwEnumerateKey NtEnumerateKey
 #define ZwEnumerateValueKey NtEnumerateValueKey
+#define ZwQueryKey NtQueryKey
 #define ZwQueryValueKey NtQueryValueKey
 #define ZwSetValueKey NtSetValueKey
 #define ZwDeleteValueKey NtDeleteValueKey
