@@ -1211,6 +1211,7 @@ namespace NT
                     return nthdrs32->OptionalHeader.DataDirectory[datadir_index];
                 }
             }
+            [[fallthrough]];
         case IMAGE_FILE_MACHINE_AMD64:
             if (datadir_index < nthdrs->OptionalHeader.NumberOfRvaAndSizes)
             {

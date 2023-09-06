@@ -92,13 +92,19 @@ int wmain(int, wchar_t**)
     _ASSERTE(NT::GetKernel32() == ::GetModuleHandleW(L"kernel32.dll"));
     _ASSERTE(NT::GetKernel32() == ::GetModuleHandleW(L"kernel32"));
     wprintf(L"Module #2 ntdll   : 0x%08p\n", NT::GetNtDll());
-    wprintf(L"\t-> %wZ\n", NT::GetNtDllDirectory()); //-V510
+    auto usNtDllDir = NT::GetNtDllDirectory();
+    wprintf(L"\t-> %wZ\n", &usNtDllDir);
     auto* ldrdata = NT::GetPebLdr();
     if (ldrdata)
     {
         WCHAR const name[] = L"kernelbase.dll";
         HMODULE hMod = NT::GetModuleHandleW(name);
         _ASSERTE(hMod == ::GetModuleHandleW(name));
+        if (!hMod)
+        {
+            fwprintf(stderr, L"Failed to retrieve module handle for %ws: 0x%08p\n", name, hMod);
+            return 1;
+        }
 
         wprintf(L"Module handle retrieved for %ws: 0x%08p\n", name, hMod);
 
@@ -123,6 +129,7 @@ int wmain(int, wchar_t**)
     else
     {
         fwprintf(stderr, L"Failed to retrieve loader data from PEB!\n");
+        return 1;
     }
     return 0;
 }

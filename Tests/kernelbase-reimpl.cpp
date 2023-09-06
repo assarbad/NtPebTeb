@@ -23,7 +23,6 @@ namespace
 
 using NT::byte;
 using std::wstring;
-using strvec = std::array<wstring>;
 
 class KernelBase : public ::testing::Test
 {
@@ -37,7 +36,7 @@ TEST_F(KernelBase, GetModuleHandleW)
 {
     ASSERT_EQ(NT::GetModuleHandleW(nullptr), ::GetModuleHandleW(nullptr));
 
-    strvec const names{L"ntdll.dll", L"kernelbase.dll", L"kernel32.dll"};
+    std::array<wstring, 3> const names{L"ntdll.dll", L"kernelbase.dll", L"kernel32.dll"};
     wstring const SystemRoot(NT::SystemRoot);
     wstring SystemDir = SystemRoot + L"\\System32\\";
 
