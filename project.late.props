@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<_PropertySheetDisplayName>Project-specific overrides</_PropertySheetDisplayName>
-		<OutDir>$(MSBuildThisFileDirectory)bin\$(Configuration).$(PlatformShortName)\</OutDir>
+		<_PropertySheetDisplayName>Project-specific overrides (late)</_PropertySheetDisplayName>
+		<OutDir>$(MSBuildThisFileDirectory)bin\</OutDir>
 		<IntDir>$(MSBuildThisFileDirectory)obj\$(ProjectName).$(Configuration).$(PlatformShortName)\</IntDir>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -17,32 +17,41 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<TargetName>$(ProjectName)64</TargetName>
 	</PropertyGroup>
+	<ItemDefinitionGroup>
+		<ClCompile>
+			<AdditionalOptions>%(AdditionalOptions) /d1trimfile:"$(MSBuildThisFileDirectory)\" /Zc:__cplusplus /utf-8 /GS /Brepro</AdditionalOptions>
+		</ClCompile>
+		<Link Condition="'$(ConfigurationType)' != 'StaticLibrary'">
+			<AdditionalOptions>%(AdditionalOptions) /Brepro</AdditionalOptions>
+		</Link>
+		<Lib Condition="'$(ConfigurationType)' == 'StaticLibrary'">
+			<AdditionalOptions>%(AdditionalOptions) /Brepro</AdditionalOptions>
+		</Lib>
+	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
 		<ClCompile>
-			<AdditionalOptions>/Zc:__cplusplus /utf-8 /GS %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Disabled</Optimization>
 			<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
 		</ClCompile>
-		<Link>
+		<Link Condition="'$(ConfigurationType)' != 'StaticLibrary'">
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<AdditionalOptions>/pdbaltpath:%_PDB% /dynamicbase /nxcompat %(AdditionalOptions)</AdditionalOptions>
+			<ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
 		<ClCompile>
-			<AdditionalOptions>/Zc:__cplusplus /utf-8 /GS /Oi /Os /Gy %(AdditionalOptions)</AdditionalOptions>
+			<AdditionalOptions>%(AdditionalOptions) /Oi /Os /Gy</AdditionalOptions>
 			<Optimization>Full</Optimization>
 			<FunctionLevelLinking>true</FunctionLevelLinking>
 			<IntrinsicFunctions>true</IntrinsicFunctions>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
 			<StringPooling>true</StringPooling>
 		</ClCompile>
-		<Link>
+		<Link Condition="'$(ConfigurationType)' != 'StaticLibrary'">
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
 			<OptimizeReferences>true</OptimizeReferences>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<AdditionalOptions>/pdbaltpath:%_PDB% /dynamicbase /nxcompat %(AdditionalOptions)</AdditionalOptions>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)'=='Release' AND '$(PlatformToolset)'!='ClangCL'">
@@ -59,7 +68,23 @@
 			<MinimalRebuild>false</MinimalRebuild>
 			<PreprocessorDefinitions>_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;_ALLOW_RTCc_IN_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<DebugInformationFormat Condition="'$(ConfigurationType)' != 'StaticLibrary'">ProgramDatabase</DebugInformationFormat>
+			<DebugInformationFormat Condition="'$(ConfigurationType)' == 'StaticLibrary'">OldStyle</DebugInformationFormat>
 		</ClCompile>
+		<Link Condition="'$(ConfigurationType)' != 'StaticLibrary'">
+			<EnableUAC>false</EnableUAC>
+			<AdditionalOptions>%(AdditionalOptions) /pdbaltpath:%_PDB% /dynamicbase /nxcompat</AdditionalOptions>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="false">
+		<ClCompile>
+			<AdditionalOptions>%(AdditionalOptions) /Bt+</AdditionalOptions>
+		</ClCompile>
+		<Link Condition="'$(ConfigurationType)' != 'StaticLibrary'">
+			<AdditionalOptions>%(AdditionalOptions) /time+</AdditionalOptions>
+		</Link>
+		<Lib Condition="'$(ConfigurationType)' == 'StaticLibrary'">
+			<AdditionalOptions>%(AdditionalOptions) /time+</AdditionalOptions>
+		</Lib>
 	</ItemDefinitionGroup>
 </Project>
