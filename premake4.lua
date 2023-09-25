@@ -113,6 +113,7 @@ do
         ['<AdditionalLibraryDirectories>%s;%%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>'] = 0,
         ['<WarningLevel>Level3</WarningLevel>'] = 0,
         ['<SmallerTypeCheck>true</SmallerTypeCheck>'] = 0,
+        ['<ImportLibrary>%s</ImportLibrary>'] = 0,
     }
     -- Embed the property sheet
     previousmsg = nil
