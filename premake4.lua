@@ -115,14 +115,33 @@ do
         ['<SmallerTypeCheck>true</SmallerTypeCheck>'] = 0,
     }
     -- Embed the property sheet
+    previousmsg = nil
     _G.override_vcxproj = function(prj, orig_p, indent, msg, first, ...)
+        oldpreviousmsg = previousmsg
+        previousmsg = msg
         if indent == 1 then
             if msg == [[<ImportGroup Label="ExtensionSettings">]] then
                 orig_p(indent, msg, first, ...) -- pass through original line
                 orig_p(indent, [[</ImportGroup>]])
                 orig_p(indent, [[<ImportGroup Label="PropertySheets">]])
-                orig_p(indent+1, [[<Import Project="$(SolutionDir)project.props" Condition="exists('$(SolutionDir)project.props')" Label="ProjectSpecific (solution)" />]])
-                orig_p(indent+1, [[<Import Project="$(ProjectDir)project.props" Condition="exists('$(ProjectDir)project.props') AND '$(SolutionDir)' != '$(ProjectDir)'" Label="Project-specific (local)" />]])
+                orig_p(indent+1, [[<Import Project="$(SolutionDir)project.early.props" Condition="exists('$(SolutionDir)project.early.props')" Label="ProjectSpecific (solution/early)" />]])
+                orig_p(indent+1, [[<Import Project="$(ProjectDir)project.early.props" Condition="exists('$(ProjectDir)project.early.props') AND '$(SolutionDir)' != '$(ProjectDir)'" Label="Project-specific (local/early)" />]])
+                return true
+            end
+            if msg == [[<ItemGroup>]] and oldpreviousmsg == [[</ItemDefinitionGroup>]] then
+                orig_p(indent, [[<ImportGroup Label="PropertySheets">]])
+                orig_p(indent+1, [[<Import Project="$(SolutionDir)project.late.props" Condition="exists('$(SolutionDir)project.late.props')" Label="ProjectSpecific (solution/late)" />]])
+                orig_p(indent+1, [[<Import Project="$(ProjectDir)project.late.props" Condition="exists('$(ProjectDir)project.late.props') AND '$(SolutionDir)' != '$(ProjectDir)'" Label="Project-specific (local/late)" />]])
+                orig_p(indent, [[</ImportGroup>]])
+                orig_p(indent, msg, first, ...) -- pass through original line
+                return true
+            end
+            if msg == [[<ImportGroup Label="ExtensionTargets">]] then
+                orig_p(indent, [[<ImportGroup Label="PropertySheets">]])
+                orig_p(indent+1, [[<Import Project="$(SolutionDir)project.targets" Condition="exists('$(SolutionDir)project.targets')" Label="ProjectSpecific (solution/targets)" />]])
+                orig_p(indent+1, [[<Import Project="$(ProjectDir)project.targets" Condition="exists('$(ProjectDir)project.targets') AND '$(SolutionDir)' != '$(ProjectDir)'" Label="Project-specific (local/targets)" />]])
+                orig_p(indent, [[</ImportGroup>]])
+                orig_p(indent, msg, first, ...) -- pass through original line
                 return true
             end
         end

@@ -16,7 +16,7 @@
     <None Include="premake4.lua">
       <Filter>Special Files</Filter>
     </None>
-    <None Include="project.props" />
+    <None Include="project.late.props" />
     <None Include="Directory.Build.targets" />
     <None Include=".editorconfig" />
     <None Include=".clang-format" />

@@ -216,8 +216,8 @@ extern "C"
         ULONG_PTR Information;
     } IO_STATUS_BLOCK, *PIO_STATUS_BLOCK;
 
-#   define RtlMoveMemory(Destination,Source,Length) memmove((Destination),(Source),(Length))
-#   define RtlFillMemory(Destination,Length,Fill) memset((Destination),(Fill),(Length))
+#   define RtlMoveMemory(Destination,Source,Length) memmove((Destination),(Source),(Length)) // use __movsb?
+#   define RtlFillMemory(Destination,Length,Fill) memset((Destination),(Fill),(Length)) // use __stosb?
 #   define RtlZeroMemory(Destination,Length) memset((Destination),0,(Length))
 
     NTSTATUS

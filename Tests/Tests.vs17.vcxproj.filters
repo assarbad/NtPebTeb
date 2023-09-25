@@ -54,6 +54,9 @@
     <ClInclude Include="googlemock\include\gmock\gmock.h">
       <Filter>Google\Mock\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="googletest\include\gtest\gtest-assertion-result.h">
+      <Filter>Google\Test\Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="googletest\include\gtest\gtest-death-test.h">
       <Filter>Google\Test\Header Files</Filter>
     </ClInclude>
