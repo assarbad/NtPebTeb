@@ -25,7 +25,7 @@
 #define __EXEVERSION_H_VER__ 2021122021
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
-#pragma once
+#    pragma once
 #endif
 
 #include "hgid.h"
@@ -48,24 +48,24 @@
 // clang-format off
 #define EXE_YEAR           2021   // current year or timespan (e.g. 2003-2007)
 #define TEXT_WEBSITE       https:/##/assarbad.net // website
+
+#define TEXT_PRODUCTNAME   PEB and TEB investigator                     // product's name
+#define TEXT_FILEDESC      Small program to investigate the PEB and TEB // component description
+#define TEXT_COMPANY       Oliver Schneider (assarbad.net)              // company
+#define TEXT_MODULE        NtPebTeb                                     // module name
+#define TEXT_COPYRIGHT     Copyright \x00a9 EXE_YEAR TEXT_COMPANY        // copyright information
+// #define TEXT_SPECIALBUILD      // optional comment for special builds
+#define TEXT_INTERNALNAME  NtPebTeb.exe
 // clang-format on
 
-#define TEXT_PRODUCTNAME   PEB and TEB investigator                 // product's name
-#define TEXT_FILEDESC      Small program to investigate the PEB and TEB // component description
-#define TEXT_COMPANY       Oliver Schneider(assarbad.net)           // company
-#define TEXT_MODULE        NtPebTeb                                 // module name
-#define TEXT_COPYRIGHT     Copyright \x00a9 EXE_YEAR TEXT_AUTHOR    // copyright information
-#define TEXT_INTERNALNAME  NtPebTeb.exe
+#define _ANSISTRING(text)  #text
+#define ANSISTRING(text)   _ANSISTRING(text)
 
-#define _ANSISTRING(text) #text
-#define ANSISTRING(text)  _ANSISTRING(text)
-
-#define _WIDESTRING(text) L##text
-#define WIDESTRING(text)  _WIDESTRING(text)
+#define _WIDESTRING(text)  L##text
+#define WIDESTRING(text)   _WIDESTRING(text)
 
 #define PRESET_UNICODE_STRING(symbol, buffer) \
-    UNICODE_STRING symbol = {                 \
-        sizeof(WIDESTRING(buffer)) - sizeof(WCHAR), sizeof(WIDESTRING(buffer)), WIDESTRING(buffer)};
+    UNICODE_STRING symbol = {sizeof(WIDESTRING(buffer)) - sizeof(WCHAR), sizeof(WIDESTRING(buffer)), WIDESTRING(buffer)};
 
 #define CREATE_XVER(maj, min, patch, build) maj##, ##min##, ##patch##, ##build
 #define CREATE_FVER(maj, min, patch, build) maj##.##min##.##patch##.##build

@@ -137,6 +137,6 @@ TEST_P(LdrFuncs, GetProcAddr)
 
 auto GetLdrFuncTestName = [](testing::TestParamInfo<DllNameOrdinal> const& info) { return std::get<2>(info.param); };
 
-INSTANTIATE_TEST_SUITE_P(ntdll, LdrFuncs, testing::ValuesIn(dllmap[L"ntdll.dll"]), GetLdrFuncTestName); //-V808
+INSTANTIATE_TEST_SUITE_P(ntdll, LdrFuncs, testing::ValuesIn(dllmap[L"ntdll.dll"]), GetLdrFuncTestName);           //-V808
 INSTANTIATE_TEST_SUITE_P(kernelbase, LdrFuncs, testing::ValuesIn(dllmap[L"kernelbase.dll"]), GetLdrFuncTestName); //-V808
-INSTANTIATE_TEST_SUITE_P(kernel32, LdrFuncs, testing::ValuesIn(dllmap[L"kernel32.dll"]), GetLdrFuncTestName); //-V808
+INSTANTIATE_TEST_SUITE_P(kernel32, LdrFuncs, testing::ValuesIn(dllmap[L"kernel32.dll"]), GetLdrFuncTestName);     //-V808

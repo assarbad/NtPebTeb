@@ -114,12 +114,12 @@ TEST_F(Ntdll, GetPebLdrListHead)
     ASSERT_NE(pebldr, nullptr);
     if (pebldr)
     {
-    LIST_ENTRY const* init = NT::GetPebLdrListHead(pebldr, PebLdrOrder::init);
-    LIST_ENTRY const* load = NT::GetPebLdrListHead(pebldr, PebLdrOrder::load);
-    LIST_ENTRY const* memr = NT::GetPebLdrListHead(pebldr, PebLdrOrder::memory);
+        LIST_ENTRY const* init = NT::GetPebLdrListHead(pebldr, PebLdrOrder::init);
+        LIST_ENTRY const* load = NT::GetPebLdrListHead(pebldr, PebLdrOrder::load);
+        LIST_ENTRY const* memr = NT::GetPebLdrListHead(pebldr, PebLdrOrder::memory);
 
-    ASSERT_EQ((void*)pebldr->InInitializationOrderModuleList.Flink, (void*)init);
-    ASSERT_EQ((void*)pebldr->InLoadOrderModuleList.Flink, (void*)load);
-    ASSERT_EQ((void*)pebldr->InMemoryOrderModuleList.Flink, (void*)memr);
+        ASSERT_EQ((void*)pebldr->InInitializationOrderModuleList.Flink, (void*)init);
+        ASSERT_EQ((void*)pebldr->InLoadOrderModuleList.Flink, (void*)load);
+        ASSERT_EQ((void*)pebldr->InMemoryOrderModuleList.Flink, (void*)memr);
     }
 }

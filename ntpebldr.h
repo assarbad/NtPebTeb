@@ -34,7 +34,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
-#define __NTPEBLDR_H_VER__ 2023073123
+#define __NTPEBLDR_H_VER__ 2023100520
 #if !NTPEBLDR_NO_PRAGMA_ONCE && ((defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP))
 #    pragma once
 #endif
@@ -51,7 +51,25 @@ static_assert(__cplusplus >= 201703L, "This header expects a C++17 compatible co
 #pragma warning(disable : 4005)
 #include <ntstatus.h>
 #pragma warning(pop)
+#pragma push_macro("NTSYSCALLAPI")
+#ifdef NTSYSCALLAPI
+#    undef NTSYSCALLAPI
+#    define NTSYSCALLAPI
+#endif
+#pragma warning(disable : 4201)
+#define OBJECT_INFORMATION_CLASS  OBJECT_INFORMATION_CLASS_MOCK
+#define _OBJECT_INFORMATION_CLASS _OBJECT_INFORMATION_CLASS_MOCK
+#define ObjectBasicInformation    ObjectBasicInformation_Mock
+#define ObjectTypeInformation     ObjectTypeInformation_Mock
+#define NtQueryObject             NtQueryObject_Mock
 #include <winternl.h>
+#undef OBJECT_INFORMATION_CLASS
+#undef _OBJECT_INFORMATION_CLASS
+#undef ObjectBasicInformation
+#undef ObjectTypeInformation
+#undef NtQueryObject
+#pragma warning(default : 4201)
+#pragma pop_macro("NTSYSCALLAPI")
 
 #ifndef NTPEBLDR_LITERAL_UNICODE_STRING
 #    define NTPEBLDR_LITERAL_UNICODE_STRING(s)                            \
@@ -66,13 +84,15 @@ static_assert(__cplusplus >= 201703L, "This header expects a C++17 compatible co
 #ifndef NTPEBLDR_NAIVE_CRT_INLINES
 #    define NTPEBLDR_NAIVE_CRT_INLINES 1
 #endif
-#ifndef STATIC_INLINE
-#    ifdef _MSC_VER
-#        define STATIC_INLINE static __forceinline
-#    else
-#        define STATIC_INLINE static inline
-#    endif // _MSC_VER
-#endif     // STATIC_INLINE
+#pragma push_macro("STATIC_INLINE")
+#ifdef STATIC_INLINE
+#    undef STATIC_INLINE
+#endif // STATIC_INLINE
+#ifdef _MSC_VER
+#    define STATIC_INLINE static __forceinline
+#else
+#    define STATIC_INLINE static inline
+#endif // _MSC_VER
 #if !NTPEBLDR_NAIVE_CRT_INLINES
 #    include <cstdio> // towupper/towlower et. al.
 #endif
@@ -83,21 +103,24 @@ static_assert(__cplusplus >= 201703L, "This header expects a C++17 compatible co
 
 namespace NT
 {
+#if !defined(__NTNATIVE_H_VER__)
 // Must correspond to IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA from km/ntimage.h
 // Kernel mode address is KI_USER_SHARED_DATA (on ARM64 this is relocatable!)
-#if defined(_WIN32) && (defined(_M_IX86) || defined(_M_AMD64))
-#    ifndef MM_SHARED_USER_DATA_VA
-#        define MM_SHARED_USER_DATA_VA                          ((unsigned char*)0x7ffe0000)
-#        define IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA MM_SHARED_USER_DATA_VA
-#    endif
+#    if defined(_WIN32) && (defined(_M_IX86) || defined(_M_AMD64))
+#        ifndef MM_SHARED_USER_DATA_VA
+#            define MM_SHARED_USER_DATA_VA                          ((unsigned char*)0x7ffe0000)
+#            define IMAGE_DYNAMIC_RELOCATION_MM_SHARED_USER_DATA_VA MM_SHARED_USER_DATA_VA
+#        endif
     namespace
-    {
-        WCHAR const (&SystemRoot)[260] = (decltype(SystemRoot))(*(WCHAR*)(MM_SHARED_USER_DATA_VA + 0x30));
-        USHORT const& NativeProcessorArchitecture = *((USHORT*)(MM_SHARED_USER_DATA_VA + 0x026a));
-        ULONG const& MajorVersion = *((ULONG*)(MM_SHARED_USER_DATA_VA + 0x026c));
-        ULONG const& MinorVersion = *((ULONG*)(MM_SHARED_USER_DATA_VA + 0x0270));
+    { // NB: these are intentionally defined in terms of C++ types rather than "Windows" types
+        // Modern C++: wchar_t const (&SystemRoot)[260] = (decltype(SystemRoot))(*(wchar_t*)(MM_SHARED_USER_DATA_VA + 0x30));
+        wchar_t const (&SystemRoot)[260] = (wchar_t const (&)[260])(*(wchar_t*)(MM_SHARED_USER_DATA_VA + 0x30));
+        unsigned short const& NativeProcessorArchitecture = *((unsigned short*)(MM_SHARED_USER_DATA_VA + 0x026a));
+        unsigned long const& MajorVersion = *((unsigned long*)(MM_SHARED_USER_DATA_VA + 0x026c));
+        unsigned long const& MinorVersion = *((unsigned long*)(MM_SHARED_USER_DATA_VA + 0x0270));
     } // namespace
-#endif
+#    endif
+#endif // !__NTNATIVE_H_VER__
 
     using byte = unsigned char;
 
@@ -1320,4 +1343,5 @@ namespace NT
     }
 } // namespace NT
 
+#pragma pop_macro("STATIC_INLINE")
 #endif // __NTPEBLDR_H_VER__
