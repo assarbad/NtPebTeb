@@ -28,6 +28,7 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <cstdio>
 #include <tchar.h>
@@ -45,6 +46,9 @@
 
 #define NTPEBLDR_UNDERHANDED
 #define NTPEBLDR_PRINT_FUNCS
+// #include "ntnative.h"
+// #include "ntpebldr.h"
+// #include "ntnative.h"
 #include "ntpebldr.h"
 
 using NT::PebLdrOrder;
