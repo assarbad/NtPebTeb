@@ -40,7 +40,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __NTNATIVE_H_VER__
-#define __NTNATIVE_H_VER__ 2023100820
+#define __NTNATIVE_H_VER__ 2023100821
 #if (defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP)
 #    pragma once
 #endif // Check for "#pragma once" support
@@ -1896,21 +1896,17 @@ extern "C"
            // Padding up to size 0x1838
         } TEB, *PTEB;
 #endif // !defined(__NTPEBLDR_H_VER__)
-#if defined(__cplusplus)
-    } // namespace NT
-#endif
 
-#if !defined(_INC_WINAPIFAMILY) // newer SDKs seem to define this in winnt.h, which transiently includes this define
-    static inline NT::TEB* NtCurrentTeb()
+    static inline TEB* NtCurrentTeb()
     {
 #    if defined(_WIN64) && defined(_M_X64)
-        return (NT::TEB*)__readgsqword(FIELD_OFFSET(NT_TIB, Self));
+        return (TEB*)__readgsqword(FIELD_OFFSET(NT_TIB, Self));
 #        ifdef _MSVC_LANG
         static_assert(FIELD_OFFSET(NT_TIB, Self) == 0x30, "Something is wrong with the NT_TIB struct");
 #        endif // _MSVC_LANG
 #    elif defined(_WIN32) && defined(_M_IX86)
 #        pragma warning(suppress : 4312)
-        return (NT::TEB*)__readfsdword(FIELD_OFFSET(NT_TIB, Self));
+        return (TEB*)__readfsdword(FIELD_OFFSET(NT_TIB, Self));
 #        ifdef _MSVC_LANG
         static_assert(FIELD_OFFSET(NT_TIB, Self) == 0x18, "Something is wrong with the NT_TIB struct");
 #        endif // _MSVC_LANG
@@ -1918,11 +1914,13 @@ extern "C"
 #        error This isn't currently implemented on the current platform, it seems. Review the code, implement it and retry.
 #    endif
     }
+#if defined(__cplusplus)
+    } // namespace NT
 #endif
 
     static inline ULONG NTAPI RtlSetLastWin32Error(DWORD dwError)
     {
-        ((NT::TEB*)NtCurrentTeb())->LastErrorValue = dwError;
+        ((NT::TEB*)NT::NtCurrentTeb())->LastErrorValue = dwError;
         return dwError;
     }
 
