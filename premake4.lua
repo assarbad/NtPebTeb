@@ -87,6 +87,45 @@ solution ("NtPebTeb")
             defines         {"NDEBUG"}
             flags           {"Optimize", "NoIncrementalLink", "NoEditAndContinue"}
 
+function testprj(name, lang, buildopts)
+    project ("ntnative-" .. name)
+        uuid            (os.uuid(name))
+        language        (lang)
+        kind            ("ConsoleApp")
+        flags           {"StaticRuntime", "Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
+        defines         {"WIN32", "_CONSOLE",}
+        if buildopts ~= nil then
+            buildoptions(buildopts)
+        end
+
+        files
+        {
+            name .. ".c*",
+            "ntnative.h",
+            "ntpebldr.h",
+            "compile-test.inl",
+        }
+
+        vpaths
+        {
+            ["Header Files/*"] = { "*.h", "compile-test.inl" },
+            ["Source Files/*"] = { name .. ".c*", },
+        }
+
+        configuration {"Debug"}
+            defines         {"_DEBUG"}
+
+        configuration {"Release"}
+            defines         {"NDEBUG"}
+            flags           {"Optimize", "NoIncrementalLink", "NoEditAndContinue"}
+end
+
+    testprj("compile-test-c", "C")
+    -- testprj("compile-test-cxx11", "C" )
+    testprj("compile-test-cxx14", "C++", { "/std:c++14", "/permissive-", })
+    testprj("compile-test-cxx17", "C++", { "/std:c++17", "/permissive-", })
+    testprj("compile-test-cxx20", "C++", { "/std:c++20", "/permissive-", })
+
 do
     -- Some tags we suppress as we override those from the project.props file
     local suppress_tags2 = {

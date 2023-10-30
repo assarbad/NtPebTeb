@@ -19,11 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9D0269DA-AB26-4548-9424-58418D848B24}</ProjectGuid>
-    <RootNamespace>NtPebTeb</RootNamespace>
+    <ProjectGuid>{5AC0002D-4BB4-ED46-924B-18B2E6013F89}</ProjectGuid>
+    <RootNamespace>ntnative-compile-test-cxx17</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>NtPebTeb</ProjectName>
+    <ProjectName>ntnative-compile-test-cxx17</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -84,6 +84,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
+      <AdditionalOptions>/std:c++17 /permissive- %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
@@ -96,6 +97,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <AdditionalOptions>/std:c++17 /permissive- %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
@@ -108,6 +110,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
+      <AdditionalOptions>/std:c++17 /permissive- %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
@@ -120,6 +123,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
+      <AdditionalOptions>/std:c++17 /permissive- %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
@@ -135,32 +139,15 @@
     <Import Project="$(ProjectDir)project.late.props" Condition="exists('$(ProjectDir)project.late.props') AND '$(SolutionDir)' != '$(ProjectDir)'" Label="Project-specific (local/late)" />
   </ImportGroup>
   <ItemGroup>
-    <ClInclude Include="exeversion.h" />
     <ClInclude Include="ntnative.h" />
     <ClInclude Include="ntpebldr.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="compile-test-cxx11.cpp">
-    </ClCompile>
-    <ClCompile Include="compile-test-cxx14.cpp">
-    </ClCompile>
     <ClCompile Include="compile-test-cxx17.cpp">
-    </ClCompile>
-    <ClCompile Include="compile-test-cxx20.cpp">
-    </ClCompile>
-    <ClCompile Include="NtPebTeb.cpp">
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="README.md" />
-    <None Include="premake4.lua" />
-    <None Include="project.early.props" />
-    <None Include="project.late.props" />
-    <None Include="Directory.Build.targets" />
-    <None Include=".editorconfig" />
-    <None Include=".clang-format" />
-    <None Include=".gitignore" />
-    <None Include=".hgignore" />
+    <None Include="compile-test.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="PropertySheets">

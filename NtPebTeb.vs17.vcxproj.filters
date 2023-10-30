@@ -40,6 +40,18 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="compile-test-cxx11.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="compile-test-cxx14.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="compile-test-cxx17.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="compile-test-cxx20.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="NtPebTeb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
