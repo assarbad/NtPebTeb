@@ -21,7 +21,7 @@ class Ntdll : public ::testing::Test
     HMODULE hNtdll = nullptr;
     LONG(NTAPI* RtlCompareUnicodeString)(PCUNICODE_STRING, PCUNICODE_STRING, BOOLEAN) = nullptr;
     VOID(NTAPI* RtlInitUnicodeString)(PUNICODE_STRING, LPCWSTR) = nullptr;
-    NT::PEB* (NTAPI* RtlGetCurrentPeb)() = nullptr;
+    NT::PEB*(NTAPI* RtlGetCurrentPeb)() = nullptr;
 
     void SetUp() override
     {
