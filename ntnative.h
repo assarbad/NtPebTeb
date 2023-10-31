@@ -40,10 +40,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __NTNATIVE_H_VER__
-#define __NTNATIVE_H_VER__ 2023103022
+#define __NTNATIVE_H_VER__ 2023103122
 #if (defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP)
 #    pragma once
 #endif // Check for "#pragma once" support
+
+#pragma push_macro("STATIC_INLINE")
+#ifdef STATIC_INLINE
+#    undef STATIC_INLINE
+#endif // STATIC_INLINE
+#ifdef _MSC_VER
+#    define STATIC_INLINE static __forceinline
+#else
+#    define STATIC_INLINE static inline
+#endif // _MSC_VER
 
 // Fake the SAL1 annotations where they don't exist.
 #if !defined(__in_bcount) && !defined(_In_reads_bytes_)
@@ -1898,7 +1908,7 @@ extern "C"
 #endif // !defined(__NTPEBLDR_H_VER__)
 
 #if defined(__cplusplus)
-        static inline TEB* NtCurrentTeb()
+        STATIC_INLINE TEB* NtCurrentTeb()
         {
 #    if defined(_WIN64) && defined(_M_X64)
             return (TEB*)__readgsqword(FIELD_OFFSET(NT_TIB, Self));
@@ -1918,7 +1928,7 @@ extern "C"
     } // namespace NT
 #endif
 
-    static inline ULONG NTAPI RtlSetLastWin32Error(DWORD dwError)
+    STATIC_INLINE ULONG NTAPI RtlSetLastWin32Error(DWORD dwError)
     {
 #if defined(__cplusplus)
         ((NT::TEB*)NT::NtCurrentTeb())->LastErrorValue = dwError;
@@ -1928,7 +1938,7 @@ extern "C"
         return dwError;
     }
 
-    static inline DWORD RtlSetLastWin32ErrorAndNtStatusFromNtStatus(NTSTATUS Status)
+    STATIC_INLINE DWORD RtlSetLastWin32ErrorAndNtStatusFromNtStatus(NTSTATUS Status)
     {
 #if defined(__cplusplus)
         DWORD dwWin32Error = ::RtlNtStatusToDosError(Status); // ERROR_MR_MID_NOT_FOUND if no corresponding Win32 status exists
@@ -2004,4 +2014,5 @@ namespace NT
 } // namespace NT
 #endif
 
+#pragma pop_macro("STATIC_INLINE")
 #endif // __NTNATIVE_H_VER__

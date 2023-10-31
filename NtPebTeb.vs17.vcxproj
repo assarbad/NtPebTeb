@@ -140,14 +140,6 @@
     <ClInclude Include="ntpebldr.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="compile-test-cxx11.cpp">
-    </ClCompile>
-    <ClCompile Include="compile-test-cxx14.cpp">
-    </ClCompile>
-    <ClCompile Include="compile-test-cxx17.cpp">
-    </ClCompile>
-    <ClCompile Include="compile-test-cxx20.cpp">
-    </ClCompile>
     <ClCompile Include="NtPebTeb.cpp">
     </ClCompile>
   </ItemGroup>

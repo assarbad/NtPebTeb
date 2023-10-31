@@ -4,9 +4,15 @@
 // unsigned long const* const dwMinorVersion = (unsigned long*)(MM_SHARED_USER_DATA_VA + 0x0270);
 
 #include <Windows.h>
-#include "ntnative.h"
 
 #ifdef __cplusplus
+#include <cstdio>
+#else
+#include <stdio.h>
+#endif
+#include "ntnative.h"
+
+#if defined(__cplusplus) && defined(_MSVC_LANG) && (_MSVC_LANG >= 201703L)
 #    include "ntpebldr.h"
 #endif // __cplusplus
 

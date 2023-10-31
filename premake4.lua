@@ -14,82 +14,84 @@
   ]]
 local action = _ACTION or ""
 
-solution ("NtPebTeb")
-    configurations  {"Debug", "Release"}
-    platforms       {"x32", "x64"}
-    location        (".")
+    solution ("NtPebTeb")
+        configurations  {"Debug", "Release"}
+        platforms       {"x32", "x64"}
+        location        (".")
 
-    project ("NtPebTeb")
-        uuid            ("9D0269DA-AB26-4548-9424-58418D848B24")
-        language        ("C++")
-        kind            ("ConsoleApp")
-        flags           {"StaticRuntime", "Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
-        defines         {"WIN32", "_CONSOLE",}
+        if action >= "vs2015" then
+            project ("NtPebTeb")
+                uuid            ("9D0269DA-AB26-4548-9424-58418D848B24")
+                language        ("C++")
+                kind            ("ConsoleApp")
+                flags           {"StaticRuntime", "Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
+                defines         {"WIN32", "_CONSOLE",}
 
-        files
-        {
-            "*.cpp",
-            "*.h",
-            "*.hpp",
-            "*.manifest",
-            "*.cmd", "*.txt", "*.md", "*.rst", "premake4.lua",
-            "*.manifest", "*.props", "*.targets", "*.ruleset", ".editorconfig", ".clang-format",
-            ".gitignore", ".hgignore",
-        }
+                files
+                {
+                    "NtPebTeb.cpp",
+                    "*.h",
+                    "*.hpp",
+                    "*.manifest",
+                    "*.cmd", "*.txt", "*.md", "*.rst", "premake4.lua",
+                    "*.manifest", "*.props", "*.targets", "*.ruleset", ".editorconfig", ".clang-format",
+                    ".gitignore", ".hgignore",
+                }
 
-        vpaths
-        {
-            ["Special Files/*"] = { "**.cmd", "premake4.lua", "**.manifest", ".gitignore", ".hgignore" },
-            ["Header Files/*"] = { "*.h", "*.hpp", },
-            ["Source Files/*"] = { "*.cpp", },
-        }
+                vpaths
+                {
+                    ["Special Files/*"] = { "**.cmd", "premake4.lua", "**.manifest", ".gitignore", ".hgignore" },
+                    ["Header Files/*"] = { "*.h", "*.hpp", },
+                    ["Source Files/*"] = { "*.cpp", },
+                }
 
-        configuration {"Debug"}
-            defines         {"_DEBUG"}
+                configuration {"Debug"}
+                    defines         {"_DEBUG"}
 
-        configuration {"Release"}
-            defines         {"NDEBUG"}
-            flags           {"Optimize", "NoIncrementalLink", "NoEditAndContinue"}
+                configuration {"Release"}
+                    defines         {"NDEBUG"}
+                    flags           {"Optimize", "NoIncrementalLink", "NoEditAndContinue"}
 
-    project ("Tests")
-        uuid            ("FF1E55B1-0257-49EB-8487-3AB48C51A8AD")
-        language        ("C++")
-        kind            ("ConsoleApp")
-        flags           {"Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
-        location        ("Tests")
-        defines         {"_CONSOLE",}
-        includedirs     {"$(ProjectDir)googlemock\\include", "$(ProjectDir)googletest\\include", "$(ProjectDir)googlemock", "$(ProjectDir)googletest",}
+            project ("Tests")
+                uuid            ("FF1E55B1-0257-49EB-8487-3AB48C51A8AD")
+                language        ("C++")
+                kind            ("ConsoleApp")
+                flags           {"Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
+                location        ("Tests")
+                defines         {"_CONSOLE",}
+                includedirs     {"$(ProjectDir)googlemock\\include", "$(ProjectDir)googletest\\include", "$(ProjectDir)googlemock", "$(ProjectDir)googletest",}
 
-        files
-        {
-            "Tests/*.cpp",
-            "Tests/googlemock/include/gmock/*.h",
-            "Tests/googletest/include/gtest/*.h",
-            "Tests/googlemock/src/gmock-all.cc",
-            "Tests/googletest/src/gtest-all.cc",
-            "Tests/googletest/src/gtest-internal-inl.h",
-        }
+                files
+                {
+                    "Tests/*.cpp",
+                    "Tests/googlemock/include/gmock/*.h",
+                    "Tests/googletest/include/gtest/*.h",
+                    "Tests/googlemock/src/gmock-all.cc",
+                    "Tests/googletest/src/gtest-all.cc",
+                    "Tests/googletest/src/gtest-internal-inl.h",
+                }
 
-        vpaths
-        {
-            ["Header Files/*"] = { "*.h" },
-            ["Google/Mock/Header Files/*"] = { "Tests/googlemock/include/gmock/*" },
-            ["Google/Test/Header Files/*"] = { "Tests/googletest/include/gtest/*" },
-            ["Google/Mock/Source Files/*"] = { "Tests/googlemock/src/*" },
-            ["Google/Test/Source Files/*"] = { "Tests/googletest/src/*" },
-            ["Source Files/*"] = { "Tests/*.cpp" },
-        }
+                vpaths
+                {
+                    ["Header Files/*"] = { "*.h" },
+                    ["Google/Mock/Header Files/*"] = { "Tests/googlemock/include/gmock/*" },
+                    ["Google/Test/Header Files/*"] = { "Tests/googletest/include/gtest/*" },
+                    ["Google/Mock/Source Files/*"] = { "Tests/googlemock/src/*" },
+                    ["Google/Test/Source Files/*"] = { "Tests/googletest/src/*" },
+                    ["Source Files/*"] = { "Tests/*.cpp" },
+                }
 
-        configuration {"Debug"}
-            defines         {"_DEBUG"}
+                configuration {"Debug"}
+                    defines         {"_DEBUG"}
 
-        configuration {"Release"}
-            defines         {"NDEBUG"}
-            flags           {"Optimize", "NoIncrementalLink", "NoEditAndContinue"}
+                configuration {"Release"}
+                    defines         {"NDEBUG"}
+                    flags           {"Optimize", "NoIncrementalLink", "NoEditAndContinue"}
+        end
 
 function testprj(name, lang, buildopts)
     project ("ntnative-" .. name)
-        uuid            (os.uuid(name))
+        uuid            (os.str2uuid("ntnative-" .. name))
         language        (lang)
         kind            ("ConsoleApp")
         flags           {"StaticRuntime", "Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
@@ -121,10 +123,19 @@ function testprj(name, lang, buildopts)
 end
 
     testprj("compile-test-c", "C")
-    -- testprj("compile-test-cxx11", "C" )
-    testprj("compile-test-cxx14", "C++", { "/std:c++14", "/permissive-", })
-    testprj("compile-test-cxx17", "C++", { "/std:c++17", "/permissive-", })
-    testprj("compile-test-cxx20", "C++", { "/std:c++20", "/permissive-", })
+    if action < "vs2010" then
+        testprj("compile-test-cxx", "C++")
+    end
+    if action >= "vs2015" then
+        -- testprj("compile-test-cxx11", "C++" )
+        testprj("compile-test-cxx14", "C++", { "/std:c++14", "/permissive-", })
+    end
+    if action >= "vs2017" then
+        testprj("compile-test-cxx17", "C++", { "/std:c++17", "/permissive-", })
+    end
+    if action >= "vs2022" then
+        testprj("compile-test-cxx20", "C++", { "/std:c++20", "/permissive-", })
+    end
 
 do
     -- Some tags we suppress as we override those from the project.props file
@@ -466,7 +477,7 @@ do
     remove_allowed_optionvalues("os") -- ... , { bsd = 0, haiku = 0, linux = 0, macosx = 0, solaris = 0, }
     remove_allowed_optionvalues("cc")
     -- ... and actions (mainly because they are untested)
-    for k,v in pairs({codeblocks = 0, codelite = 0, gmake = 0, xcode3 = 0, xcode4 = 0, vs2002 = 0, vs2003 = 0, vs2005 = 0, vs2008 = 0, vs2010 = 0, vs2012 = 0, vs2013 = 0, vs2015 = 0}) do
+    for k,v in pairs({codeblocks = 0, codelite = 0, gmake = 0, xcode3 = 0, xcode4 = 0, vs2002 = 0, vs2003 = 0, vs2008 = 0, vs2010 = 0, vs2012 = 0, vs2013 = 0, vs2015 = 0}) do
         remove_action(k)
     end
 end

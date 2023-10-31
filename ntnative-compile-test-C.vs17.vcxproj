@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{23F29B28-F0CB-744B-876B-740ACBD5A139}</ProjectGuid>
+    <ProjectGuid>{793B2317-BE60-EF5C-FB4E-EA86F36DD05D}</ProjectGuid>
     <RootNamespace>ntnative-compile-test-c</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <Keyword>Win32Proj</Keyword>

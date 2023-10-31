@@ -9,3 +9,8 @@ TestResults/
 **.bak
 BuildCommandLines*.log
 sccache/
+**.ncb
+**.suo
+**.pdb
+**.ilk
+**.exe
