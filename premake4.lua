@@ -99,6 +99,10 @@ function testprj(name, lang, buildopts)
         if buildopts ~= nil then
             buildoptions(buildopts)
         end
+        if action < "vs2010" then
+            objdir      ("obj\\" .. action)
+            targetdir   ("bin\\" .. action)
+        end
 
         files
         {

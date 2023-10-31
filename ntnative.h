@@ -40,7 +40,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __NTNATIVE_H_VER__
-#define __NTNATIVE_H_VER__ 2023103122
+#define __NTNATIVE_H_VER__ 2023103123
 #if (defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP)
 #    pragma once
 #endif // Check for "#pragma once" support
@@ -1574,9 +1574,7 @@ extern "C"
     typedef NTSTATUS(NTAPI* NtOpenDirectoryObject_t)(_Out_ PHANDLE, _In_ ACCESS_MASK, _In_ POBJECT_ATTRIBUTES);
     typedef NTSTATUS(NTAPI* NtOpenEvent_t)(_Out_ PHANDLE, _In_ ACCESS_MASK, _In_ POBJECT_ATTRIBUTES);
     typedef NTSTATUS(NTAPI* NtOpenEventPair_t)(_Out_ PHANDLE, _In_ ACCESS_MASK, _In_ POBJECT_ATTRIBUTES);
-#if defined(DDKBUILD)
     typedef NTSTATUS(NTAPI* NtOpenFile_t)(_Out_ PHANDLE, _In_ ACCESS_MASK, _In_ POBJECT_ATTRIBUTES, _Out_ PIO_STATUS_BLOCK, _In_ ULONG, _In_ ULONG);
-#endif // DDKBUILD
     typedef NTSTATUS(NTAPI* NtOpenIoCompletion_t)(_Out_ PHANDLE, _In_ ACCESS_MASK, _In_ POBJECT_ATTRIBUTES);
     typedef NTSTATUS(NTAPI* NtOpenKey_t)(_Out_ PHANDLE, _In_ ACCESS_MASK, _In_ POBJECT_ATTRIBUTES);
     typedef NTSTATUS(NTAPI* NtOpenMutant_t)(_Out_ PHANDLE, _In_ ACCESS_MASK, _In_ POBJECT_ATTRIBUTES);
@@ -1908,16 +1906,16 @@ extern "C"
 #endif // !defined(__NTPEBLDR_H_VER__)
 
 #if defined(__cplusplus)
-        STATIC_INLINE TEB* NtCurrentTeb()
+        __forceinline struct ::_TEB* NtCurrentTeb() // must not use static linking
         {
 #    if defined(_WIN64) && defined(_M_X64)
-            return (TEB*)__readgsqword(FIELD_OFFSET(NT_TIB, Self));
+            return (struct ::_TEB*)__readgsqword(FIELD_OFFSET(NT_TIB, Self));
 #        ifdef _MSVC_LANG
             static_assert(FIELD_OFFSET(NT_TIB, Self) == 0x30, "Something is wrong with the NT_TIB struct");
 #        endif // _MSVC_LANG
 #    elif defined(_WIN32) && defined(_M_IX86)
 #        pragma warning(suppress : 4312)
-            return (TEB*)__readfsdword(FIELD_OFFSET(NT_TIB, Self));
+            return (struct ::_TEB*)__readfsdword(FIELD_OFFSET(NT_TIB, Self));
 #        ifdef _MSVC_LANG
             static_assert(FIELD_OFFSET(NT_TIB, Self) == 0x18, "Something is wrong with the NT_TIB struct");
 #        endif // _MSVC_LANG
