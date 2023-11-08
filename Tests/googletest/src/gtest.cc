@@ -43,6 +43,7 @@
 #include <algorithm>
 #include <chrono>  // NOLINT
 #include <cmath>
+#include <csignal>  // NOLINT: raise(3) is used on some platforms
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -5400,7 +5401,7 @@ void UnitTest::RecordProperty(const std::string& key,
 int UnitTest::Run() {
 #ifdef GTEST_HAS_DEATH_TEST
   const bool in_death_test_child_process =
-      GTEST_FLAG_GET(internal_run_death_test).length() > 0;
+      !GTEST_FLAG_GET(internal_run_death_test).empty();
 
   // Google Test implements this protocol for catching that a test
   // program exits before returning control to Google Test:
