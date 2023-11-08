@@ -34,7 +34,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
-#define __NTPEBLDR_H_VER__ 2023103123
+#define __NTPEBLDR_H_VER__ 2023110822
 #if !NTPEBLDR_NO_PRAGMA_ONCE && ((defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP))
 #    pragma once
 #endif
@@ -527,7 +527,7 @@ namespace NT
             }
 
             // This is not exactly optimized, but should be a halfway faithful implementation of the original functionality
-            template <typename STRTYPE> STATIC_INLINE LONG CompareString(STRTYPE const& String1, STRTYPE const& String2, BOOLEAN CaseInSensitive)
+            template <typename STRTYPE> STATIC_INLINE LONG CompareStringT(STRTYPE const& String1, STRTYPE const& String2, BOOLEAN CaseInSensitive)
             {
                 using CHARTYPE = strchar_t<STRTYPE>;
                 CHARTYPE* str1 = String1.Buffer;
@@ -567,12 +567,15 @@ namespace NT
 
         STATIC_INLINE LONG RtlCompareUnicodeString(PCUNICODE_STRING String1, PCUNICODE_STRING String2, BOOLEAN CaseInSensitive)
         {
-            return crt::CompareString(*String1, *String2, CaseInSensitive);
+            return crt::CompareStringT(*String1, *String2, CaseInSensitive);
         }
 
-        STATIC_INLINE LONG RtlCompareString(PCANSI_STRING String1, PCANSI_STRING String2, BOOLEAN CaseInSensitive)
+        typedef STRING* PSTRING;
+        typedef const STRING* PCSTRING; // winternl.h is missing the const
+
+        STATIC_INLINE LONG RtlCompareString(PCSTRING String1, PCSTRING String2, BOOLEAN CaseInSensitive)
         {
-            return crt::CompareString(*String1, *String2, CaseInSensitive);
+            return crt::CompareStringT(*String1, *String2, CaseInSensitive);
         }
 
         // This is not exactly optimized, but should be a halfway faithful implementation of the original functionality
@@ -630,7 +633,7 @@ namespace NT
         {
             size_t const Offset = (String.Length / sizeof(String.Buffer[0])) - (Suffix.Length / sizeof(Suffix.Buffer[0]));
             STRTYPE const sSuspectedSuffix = {Suffix.Length, Suffix.MaximumLength, &String.Buffer[Offset]};
-            return (0 == ntdll::crt::CompareString(Suffix, sSuspectedSuffix, CaseInSensitive)) ? Offset : 0;
+            return (0 == ntdll::crt::CompareStringT(Suffix, sSuspectedSuffix, CaseInSensitive)) ? Offset : 0;
         }
 
         template <typename CHARTYPE, size_t Length, typename STRTYPE = strtype_t<CHARTYPE>>
