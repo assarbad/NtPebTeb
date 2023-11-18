@@ -1,7 +1,17 @@
-#pragma warning(push)
-#pragma warning(disable : 4244 4389)
+#if defined(__clang__) && defined(_MSC_VER)
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wsign-compare"
+#    pragma clang diagnostic ignored "-Wint-to-pointer-cast"
+#elif defined(_MSC_VER)
+#    pragma warning(push)
+#    pragma warning(disable : 4244 4389)
+#endif
 #include <gtest/gtest.h>
-#pragma warning(pop)
+#if defined(__clang__) && defined(_MSC_VER)
+#    pragma clang diagnostic pop
+#elif defined(_MSC_VER)
+#    pragma warning(pop)
+#endif
 
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_NO_STATUS

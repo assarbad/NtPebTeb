@@ -282,7 +282,7 @@ namespace NT
         } ClientId;
         PVOID ActiveRpcHandle;
         PVOID ThreadLocalStoragePointer;
-        struct NT::PEB* ProcessEnvironmentBlock;
+        struct NT::_PEB* ProcessEnvironmentBlock;
         ULONG LastErrorValue;
         ULONG CountOfOwnedCriticalSections;
         PVOID CsrClientThread;

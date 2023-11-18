@@ -40,10 +40,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __NTNATIVE_H_VER__
-#define __NTNATIVE_H_VER__ 2023103123
+#define __NTNATIVE_H_VER__ 2023111723
 #if (defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP)
 #    pragma once
 #endif // Check for "#pragma once" support
+
+#if defined(NT_INCLUDED) || defined(_WINNT_) || defined(_WINDOWS_) || defined(_INC_WINDOWS)
+#    error This header should be included before those pesky Windows headers (it also includes some of them but needs to cheat on some particulars)
+#else
+#    define WIN32_LEAN_AND_MEAN // this can be worked around by explicitly including the rarely used stuff
+#    pragma push_macro("NtCurrentTeb")
+#    define NtCurrentTeb NtCurrentTeb_Mock // comes transiently from winnt.h
+#    include <Windows.h>
+#    undef NtCurrentTeb
+#    pragma pop_macro("NtCurrentTeb")
+#endif
 
 #pragma push_macro("STATIC_INLINE")
 #ifdef STATIC_INLINE
@@ -184,11 +195,14 @@
 #endif
 
 #if defined(DDKBUILD)
-#    define NtCurrentTeb NtCurrentTeb_Mock
+#    pragma push_macro("NtCurrentTeb")
+#    define NtCurrentTeb NtCurrentTeb_Mock // comes transiently from winnt.h
 #    include <WinDef.h>
 #    undef NtCurrentTeb
+#    pragma pop_macro("NtCurrentTeb")
 #else
 #    pragma push_macro("NTSYSCALLAPI")
+#    pragma push_macro("NtCurrentTeb")
 #    ifdef NTSYSCALLAPI
 #        undef NTSYSCALLAPI
 #        define NTSYSCALLAPI
@@ -203,7 +217,7 @@
 #    define ObjectBasicInformation    ObjectBasicInformation_Mock
 #    define ObjectTypeInformation     ObjectTypeInformation_Mock
 #    define NtQueryObject             NtQueryObject_Mock
-#    define NtCurrentTeb              NtCurrentTeb_Mock
+#    define NtCurrentTeb              NtCurrentTeb_Mock // comes transiently from winnt.h (via windef.h)
 #    include <winternl.h>
 #    undef OBJECT_INFORMATION_CLASS
 #    undef _OBJECT_INFORMATION_CLASS
@@ -215,6 +229,7 @@
 #    undef NtQueryObject
 #    undef NtCurrentTeb
 #    pragma warning(pop)
+#    pragma pop_macro("NtCurrentTeb")
 #    pragma pop_macro("NTSYSCALLAPI")
 #endif // DDKBUILD
 #pragma warning(push)
@@ -1905,24 +1920,26 @@ extern "C"
         } TEB, *PTEB;
 #endif // !defined(__NTPEBLDR_H_VER__)
 
-#if defined(__cplusplus)
-        __forceinline struct ::_TEB* NtCurrentTeb() // must not use static linking
+        // clang-format off
+        __forceinline struct _TEB* NtCurrentTeb() // must not use static linking
         {
-#    if defined(_WIN64) && defined(_M_X64)
-            return (struct ::_TEB*)__readgsqword(FIELD_OFFSET(NT_TIB, Self));
-#        ifdef _MSVC_LANG
+#if defined(_WIN64) && defined(_M_X64)
+            return (struct _TEB*)__readgsqword(FIELD_OFFSET(NT_TIB, Self));
+#    ifdef _MSVC_LANG
             static_assert(FIELD_OFFSET(NT_TIB, Self) == 0x30, "Something is wrong with the NT_TIB struct");
-#        endif // _MSVC_LANG
-#    elif defined(_WIN32) && defined(_M_IX86)
-#        pragma warning(suppress : 4312)
-            return (struct ::_TEB*)__readfsdword(FIELD_OFFSET(NT_TIB, Self));
-#        ifdef _MSVC_LANG
+#    endif // _MSVC_LANG
+#elif defined(_WIN32) && defined(_M_IX86)
+#    pragma warning(suppress : 4312)
+            return (struct _TEB*)__readfsdword(FIELD_OFFSET(NT_TIB, Self));
+#    ifdef _MSVC_LANG
             static_assert(FIELD_OFFSET(NT_TIB, Self) == 0x18, "Something is wrong with the NT_TIB struct");
-#        endif // _MSVC_LANG
-#    else
-#        error This isn't currently implemented on the current platform, it seems. Review the code, implement it and retry.
-#    endif
+#    endif // _MSVC_LANG
+#else
+#    error This isn't currently implemented on the current platform, it seems. Review the code, implement it and retry.
+#endif
         }
+        // clang-format on
+#if defined(__cplusplus)
     } // namespace NT
 #endif
 

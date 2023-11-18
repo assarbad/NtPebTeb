@@ -19,7 +19,8 @@
 	</PropertyGroup>
 	<ItemDefinitionGroup>
 		<ClCompile>
-			<AdditionalOptions>%(AdditionalOptions) /d1trimfile:"$(MSBuildThisFileDirectory)\" /Zc:__cplusplus /utf-8 /GS /Brepro</AdditionalOptions>
+			<AdditionalOptions Condition="'$(PlatformToolset)' != 'ClangCL'">%(AdditionalOptions) /d1trimfile:"$(MSBuildThisFileDirectory)\"</AdditionalOptions>
+			<AdditionalOptions>%(AdditionalOptions) /Zc:__cplusplus /utf-8 /GS /Brepro</AdditionalOptions>
 		</ClCompile>
 		<Link Condition="'$(ConfigurationType)' != 'StaticLibrary'">
 			<AdditionalOptions>%(AdditionalOptions) /Brepro</AdditionalOptions>

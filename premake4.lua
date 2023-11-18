@@ -314,9 +314,9 @@ do
         if _ACTION then
             name_map = {vs2005 = "vs8", vs2008 = "vs9", vs2010 = "vs10", vs2012 = "vs11", vs2013 = "vs12", vs2015 = "vs14", vs2017 = "vs15", vs2019 = "vs16", vs2022 = "vs17"}
             if name_map[_ACTION] then
-                pattern = pattern:gsub("%%%%", "%%%%." .. name_map[_ACTION])
+                pattern = pattern:gsub("%%%%", "%%%%." .. name_map[_ACTION] .. iif(_OPTIONS["clang"] ~= nil, "clang", ""))
             else
-                pattern = pattern:gsub("%%%%", "%%%%." .. _ACTION)
+                pattern = pattern:gsub("%%%%", "%%%%." .. _ACTION .. iif(_OPTIONS["clang"] ~= nil, "clang", ""))
             end
         end
         return orig_getbasename(prjname, pattern)

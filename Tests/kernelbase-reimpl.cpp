@@ -1,7 +1,17 @@
-#pragma warning(push)
-#pragma warning(disable : 4244 4389)
+#if defined(__clang__) && defined(_MSC_VER)
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wsign-compare"
+#    pragma clang diagnostic ignored "-Wint-to-pointer-cast"
+#elif defined(_MSC_VER)
+#    pragma warning(push)
+#    pragma warning(disable : 4244 4389)
+#endif
 #include <gtest/gtest.h>
-#pragma warning(pop)
+#if defined(__clang__) && defined(_MSC_VER)
+#    pragma clang diagnostic pop
+#elif defined(_MSC_VER)
+#    pragma warning(pop)
+#endif
 
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_NO_STATUS
@@ -127,12 +137,20 @@ TEST_P(LdrFuncs, GetProcAddr)
     auto FuncPtrOurs = NT::GetProcAddress(hMod, FuncName.c_str());
     ASSERT_EQ(FuncPtrK32ByName, FuncPtrOurs);
 
+#if defined(__clang__) && defined(_MSC_VER)
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wsign-compare"
+#    pragma clang diagnostic ignored "-Wint-to-pointer-cast"
+#endif
     // kernel32!GetProcAddress with the ordinal we retrieved
     auto FuncPtrK32ByOrdinal = ::GetProcAddress(hMod, (LPCSTR)Ordinal);
     ASSERT_EQ(FuncPtrOurs, FuncPtrK32ByOrdinal);
 
     auto FuncPtrOursByOrdinal = NT::GetProcAddress(hMod, (LPCSTR)Ordinal);
     EXPECT_EQ(FuncPtrOurs, FuncPtrOursByOrdinal);
+#if defined(__clang__) && defined(_MSC_VER)
+#    pragma clang diagnostic pop
+#endif
 }
 
 auto GetLdrFuncTestName = [](testing::TestParamInfo<DllNameOrdinal> const& info) { return std::get<2>(info.param); };
