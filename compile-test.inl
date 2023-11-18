@@ -6,8 +6,8 @@
 #    include <stdio.h>
 #endif
 
-#if defined(__cplusplus) && defined(_MSVC_LANG) && (_MSVC_LANG >= 201703L)
-#    include "ntpebldr.h"
+#if (__cplusplus >= 201402L) || (_MSVC_LANG >= 201402L)
+#    include "ntpebldr.hpp"
 #endif // __cplusplus
 
 int wmain()

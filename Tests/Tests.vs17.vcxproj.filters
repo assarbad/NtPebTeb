@@ -104,7 +104,13 @@
     <ClCompile Include="ntdll-reimpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="static_murmur3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="underhanded.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="googlemock\src\gmock-all.cc">

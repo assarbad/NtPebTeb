@@ -173,7 +173,11 @@
     </ClCompile>
     <ClCompile Include="ntdll-reimpl.cpp">
     </ClCompile>
+    <ClCompile Include="static_murmur3.cpp">
+    </ClCompile>
     <ClCompile Include="Tests.cpp">
+    </ClCompile>
+    <ClCompile Include="underhanded.cpp">
     </ClCompile>
     <ClCompile Include="googlemock\src\gmock-all.cc">
     </ClCompile>

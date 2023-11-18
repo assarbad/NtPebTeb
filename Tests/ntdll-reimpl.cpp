@@ -1,3 +1,4 @@
+static_assert((_MSVC_LANG == 201402L) || (__cplusplus == 201402L), "Expecting exactly C++14 here");
 #include <gtest/gtest.h>
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_NO_STATUS
@@ -10,7 +11,7 @@ namespace
 {
 #endif // NO_TEST_NAMESPACE
 #define NTPEBLDR_NAIVE_CRT_INLINES 1
-#include "../ntpebldr.h"
+#include "../ntpebldr.hpp"
 #ifdef NO_TEST_NAMESPACE
 } // namespace
 #endif // NO_TEST_NAMESPACE

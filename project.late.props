@@ -65,7 +65,8 @@
 			<WarningLevel>Level4</WarningLevel>
 			<SDLCheck>true</SDLCheck>
 			<ConformanceMode>true</ConformanceMode>
-			<LanguageStandard Condition="!$(ProjectName.Contains('compile-test'))">stdcpp17</LanguageStandard>
+			<LanguageStandard Condition="!$(ProjectName.Contains('compile-test')) and !$(ProjectName.Contains('Tests'))">stdcpp17</LanguageStandard>
+			<LanguageStandard Condition="$(ProjectName.Contains('Tests'))">stdcpp14</LanguageStandard>
 			<MinimalRebuild>false</MinimalRebuild>
 			<PreprocessorDefinitions>_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;_ALLOW_RTCc_IN_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>

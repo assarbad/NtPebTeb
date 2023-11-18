@@ -1,3 +1,4 @@
+static_assert((_MSVC_LANG == 201402L) || (__cplusplus == 201402L), "Expecting exactly C++14 here");
 #if defined(__clang__) && defined(_MSC_VER)
 #    pragma clang diagnostic push
 #    pragma clang diagnostic ignored "-Wsign-compare"
@@ -24,7 +25,7 @@ namespace
 {
 #endif // NO_TEST_NAMESPACE
 #define NTPEBLDR_NAIVE_CRT_INLINES 1
-#include "../ntpebldr.h"
+#include "../ntpebldr.hpp"
 
     TEST(Crt, strlen)
     {

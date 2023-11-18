@@ -35,7 +35,10 @@
     <ClInclude Include="ntnative.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ntpebldr.h">
+    <ClInclude Include="ntpebldr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="underhanded-ntpebldr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

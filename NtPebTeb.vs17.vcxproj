@@ -137,7 +137,8 @@
   <ItemGroup>
     <ClInclude Include="exeversion.h" />
     <ClInclude Include="ntnative.h" />
-    <ClInclude Include="ntpebldr.h" />
+    <ClInclude Include="ntpebldr.hpp" />
+    <ClInclude Include="underhanded-ntpebldr.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NtPebTeb.cpp">

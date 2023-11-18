@@ -34,16 +34,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef __NTPEBLDR_H_VER__
-#define __NTPEBLDR_H_VER__ 2023110822
+#define __NTPEBLDR_H_VER__ 2023111821
 #if !NTPEBLDR_NO_PRAGMA_ONCE && ((defined(_MSC_VER) && (_MSC_VER >= 1020)) || defined(__MCPP))
 #    pragma once
 #endif
-#if defined(__cplusplus) && defined(_MSVC_LANG) && (__cplusplus == 199711L)
-static_assert(_MSVC_LANG >= 201703L); // "This header expects a C++17 compatible compiler."
-#elif defined(_MSC_VER) && !defined(_MSVC_LANG)
-#    error This header expects a C++17 compatible compiler.
-#else
-static_assert(__cplusplus >= 201703L); // "This header expects a C++17 compatible compiler."
+#if (__cplusplus < 201402L) && (_MSVC_LANG < 201402L)
+#    error This header expects a C++14 compatible compiler.
 #endif
 #if defined(WIN32_NO_STATUS)
 #    undef _NTSTATUS_
@@ -492,38 +488,38 @@ namespace NT
             int (*toupper_)(int) = toupper;
 #endif
 
-            template <class...> constexpr bool always_false_v = false;
+            template <typename CHARTYPE> struct tocasing;
+            template <> struct tocasing<WCHAR>
+            {
+                STATIC_INLINE WCHAR toupper(WCHAR ch)
+                {
+                    return (WCHAR)towupper_(ch);
+                }
+                STATIC_INLINE WCHAR tolower(WCHAR ch)
+                {
+                    return (WCHAR)towlower_(ch);
+                }
+            };
+            template <> struct tocasing<CHAR>
+            {
+                STATIC_INLINE CHAR toupper(CHAR ch)
+                {
+                    return (CHAR)toupper_(ch);
+                }
+                STATIC_INLINE CHAR tolower(CHAR ch)
+                {
+                    return (CHAR)tolower_(ch);
+                }
+            };
 
             template <typename CHARTYPE> STATIC_INLINE CHARTYPE toupper(CHARTYPE ch)
             {
-                if constexpr (is_same_v<CHARTYPE, WCHAR>)
-                {
-                    return (CHARTYPE)towupper_((CHARTYPE)ch);
-                }
-                else if constexpr (is_same_v<CHARTYPE, CHAR>)
-                {
-                    return (CHARTYPE)toupper_((CHARTYPE)ch);
-                }
-                else
-                {
-                    static_assert(always_false_v<CHARTYPE>, "Not supported for whatever character type this is");
-                }
+                return tocasing<CHARTYPE>::toupper(ch);
             }
 
             template <typename CHARTYPE> STATIC_INLINE CHARTYPE tolower(CHARTYPE ch)
             {
-                if constexpr (is_same_v<CHARTYPE, WCHAR>)
-                {
-                    return (CHARTYPE)towlower_((CHARTYPE)ch);
-                }
-                else if constexpr (is_same_v<CHARTYPE, CHAR>)
-                {
-                    return (CHARTYPE)tolower_((CHARTYPE)ch);
-                }
-                else
-                {
-                    static_assert(always_false_v<CHARTYPE>, "Not supported for whatever character type this is");
-                }
+                return tocasing<CHARTYPE>::tolower(ch);
             }
 
             // This is not exactly optimized, but should be a halfway faithful implementation of the original functionality
@@ -1270,7 +1266,9 @@ namespace NT
                     return nthdrs32->OptionalHeader.DataDirectory[datadir_index];
                 }
             }
+#if ((__cplusplus == 199711L) && (_MSVC_LANG >= 201707L)) || (__cplusplus >= 201707L)
             [[fallthrough]];
+#endif
         case IMAGE_FILE_MACHINE_AMD64:
             if (datadir_index < nthdrs->OptionalHeader.NumberOfRvaAndSizes)
             {
