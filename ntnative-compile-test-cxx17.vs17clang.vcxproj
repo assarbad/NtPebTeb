@@ -140,7 +140,7 @@
   </ImportGroup>
   <ItemGroup>
     <ClInclude Include="ntnative.h" />
-    <ClInclude Include="ntpebldr.h" />
+    <ClInclude Include="ntpebldr.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="compile-test-cxx17.cpp">

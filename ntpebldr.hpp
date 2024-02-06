@@ -111,7 +111,8 @@
 #endif
 #include <cstddef> // offsetof etc
 #if defined(NTPEBLDR_PRINT_FUNCS) || defined(_DEBUG)
-#    include <tchar.h>
+#    include <cstdio> // wprintf
+#    include <tchar.h> // _tprintf
 #endif // _DEBUG
 
 #ifndef _countof

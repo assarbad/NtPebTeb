@@ -10,4 +10,7 @@
 		<SetEnv Name="LOG_BUILD_COMMANDLINES" Value="$(ThisProjectBuildLogFileName)" Prefix="false" />
 		<SetEnv Name="PreferredToolArchitecture" Value="$(PreferredToolArchitecture)" Prefix="false" />
 	</Target>
+	<ImportGroup>
+		<Import Project="$(MSBuildThisFileDirectory)PreprocessSourceFiles.targets" />
+	</ImportGroup>
 </Project>

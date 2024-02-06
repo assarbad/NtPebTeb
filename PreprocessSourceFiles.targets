@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<DebugPreprocessSourceFiles>false</DebugPreprocessSourceFiles>
+	</PropertyGroup>
+	<Choose>
+		<When Condition=" '$(MSBuildVersion.Substring(0,2))' >= 16 Or ('$(MSBuildVersion.Substring(0,2))' == 15 And '$(MSBuildVersion.Substring(3,1))' >= 8)">
+			<PropertyGroup>
+				<TaskFactory>RoslynCodeTaskFactory</TaskFactory>
+			</PropertyGroup>
+		</When>
+		<Otherwise>
+			<PropertyGroup>
+				<TaskFactory>CodeTaskFactory</TaskFactory>
+			</PropertyGroup>
+		</Otherwise>
+	</Choose>
+	<UsingTask TaskName="StripPreprocessedSourceFile" TaskFactory="$(TaskFactory)" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+		<ParameterGroup>
+			<InputFilename ParameterType="System.String" Required="true" />
+			<OutputFilename ParameterType="System.String" Required="true" />
+		</ParameterGroup>
+		<Task>
+			<!-- This post-processes the preprocessed source files to strip crud (saves scrolling and mental energy) -->
+			<Using Namespace="System" />
+			<Using Namespace="System.IO" />
+			<Using Namespace="System.Text.RegularExpressions" />
+			<Code Type="Fragment" Language="cs">
+				<![CDATA[
+					var FileContents = File.ReadAllText(InputFilename);
+					var SolutionDir = @"]]>$(SolutionDir)<![CDATA[";
+					var ThisDir = @"]]>$(MSBuildThisFileDirectory)<![CDATA[";
+					var WindowsSdkDir = @"]]>$(WindowsSdkDir)<![CDATA[";
+					var VCToolsInstallDir = @"]]>$(VCToolsInstallDir)<![CDATA[";
+					SolutionDir = Uri.UnescapeDataString(SolutionDir).Replace(@"\", @"\\");
+					ThisDir = Uri.UnescapeDataString(ThisDir).Replace(@"\", @"\\");
+					WindowsSdkDir = Uri.UnescapeDataString(WindowsSdkDir).Replace(@"\", @"\\");
+					VCToolsInstallDir = Uri.UnescapeDataString(VCToolsInstallDir).Replace(@"\", @"\\");
+					var FileHeader = $"// ThisDir = {ThisDir}\n// SolutionDir = '{SolutionDir}'\n// WindowsSdkDir = '{WindowsSdkDir}'\n// VCToolsInstallDir = '{VCToolsInstallDir}'\n";
+					var NewFileContents = FileContents;
+					NewFileContents = NewFileContents.Replace(ThisDir, @".\\");
+					NewFileContents = NewFileContents.Replace(SolutionDir, @"Sln\\");
+					NewFileContents = NewFileContents.Replace(WindowsSdkDir, @"SDK\\");
+					NewFileContents = NewFileContents.Replace(VCToolsInstallDir, @"VC\\");
+					// Remove carriage returns
+					NewFileContents = Regex.Replace(NewFileContents, @"\r", "", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+					// Replace multiple consecutive line breaks with a single one
+					NewFileContents = Regex.Replace(NewFileContents, @"\n\n+", "\n", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+					// Remove "empty" lines, too
+					NewFileContents = Regex.Replace(NewFileContents, @"\n\s+?\n", "\n\n", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+					// Remove lines that start with blank space and then turn into a preprocessor #line
+					NewFileContents = Regex.Replace(NewFileContents, @"\n\s+?#line", "\n#line", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+					// Now compress all #line blocks pertaining to the same file into the last of those lines
+					NewFileContents = Regex.Replace(NewFileContents, @"(?:#line\s+?\d+\s+?""([^""]+)""\n)+(#line\s+?\d+\s+?""\1"")", "$2", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+					// Replace multiple consecutive line breaks with a single one
+					NewFileContents = Regex.Replace(NewFileContents, @"\n\n+", "\n", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+					NewFileContents = Regex.Replace(NewFileContents, @"\n\s+\n+", "\n", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+					NewFileContents = Regex.Replace(NewFileContents, @"\n\n+", "\n", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+					File.WriteAllText(OutputFilename, FileHeader + NewFileContents);
+                    var OrigLength = FileContents.Length;
+                    var NewLength = NewFileContents.Length;
+					Log.LogMessage(MessageImportance.High, $"Post-processed into {OutputFilename} (core content: {OrigLength} -> {NewLength}: -{100 - (100*NewLength/OrigLength)}%)");
+				]]>
+			</Code>
+		</Task>
+	</UsingTask>
+	<Target Name="PreprocessSourceFiles" BeforeTargets="ClCompile">
+		<!-- we take the ClCompile item group as input and filter by file extension -->
+		<ItemGroup Condition="'@(ClCompile)' != ''">
+			<BackupClCompile Remove="@(BackupClCompile)" />
+			<BackupClCompile Include="@(ClCompile)" />
+			<PreprocessSourceFiles Include="@(BackupClCompile-&gt;Metadata('Identity')-&gt;Distinct())" Condition="'%(BackupClCompile.ExcludedFromBuild)' != 'true' and ('%(BackupClCompile.Extension)' == '.cpp' or '%(BackupClCompile.Extension)' == '.cc' or '%(BackupClCompile.Extension)' == '.cxx' or '%(BackupClCompile.Extension)' == '.c')">
+				<!-- adjust PreprocessOutputPath and PreprocessToFile in our copy of the item group to force preprocessing -->
+				<PreprocessToFile>true</PreprocessToFile>
+			</PreprocessSourceFiles>
+			<ClCompile Condition="'@(PreprocessSourceFiles)' != ''" Remove="@(ClCompile)" /><!-- remove old contents -->
+			<ClCompile Condition="'@(PreprocessSourceFiles)' != ''" Include="@(PreprocessSourceFiles)" /><!-- now our list is the one to be "built" -->
+		</ItemGroup>
+		<!-- be verbose @(PreprocessSourceFiles) should equal @(ClCompile) -->
+		<Message Text="PREPROCESSING: %(ClCompile.Identity)" Importance="High" Condition="'@(ClCompile)' != '' and '%(ClCompile.PreprocessToFile)' == 'true'" />
+		<!-- kick off the preprocessing -->
+		<CL Condition="'%(ClCompile.PreprocessToFile)' == 'true' and @(ClCompile) != ''" BuildingInIDE="$(BuildingInsideVisualStudio)" Sources="@(ClCompile)" AdditionalBMIDirectories="%(ClCompile.AdditionalBMIDirectories)" AdditionalHeaderUnitDependencies="%(ClCompile.AdditionalHeaderUnitDependencies)" AdditionalIncludeDirectories="%(ClCompile.AdditionalIncludeDirectories)" AdditionalModuleDependencies="%(ClCompile.AdditionalModuleDependencies)" AdditionalOptions="%(ClCompile.AdditionalOptions)" AdditionalUsingDirectories="%(ClCompile.AdditionalUsingDirectories)" AssemblerListingLocation="%(ClCompile.AssemblerListingLocation)" AssemblerOutput="%(ClCompile.AssemblerOutput)" BasicRuntimeChecks="%(ClCompile.BasicRuntimeChecks)" BrowseInformation="%(ClCompile.BrowseInformation)" BrowseInformationFile="%(ClCompile.BrowseInformationFile)" BufferSecurityCheck="%(ClCompile.BufferSecurityCheck)" CallingConvention="%(ClCompile.CallingConvention)" ControlFlowGuard="%(ClCompile.ControlFlowGuard)" CompileAsManaged="%(ClCompile.CompileAsManaged)" CompileAsWinRT="%(ClCompile.CompileAsWinRT)" CompileAs="%(ClCompile.CompileAs)" ConformanceMode="%(ClCompile.ConformanceMode)" DebugInformationFormat="%(ClCompile.DebugInformationFormat)" DiagnosticsFormat="%(ClCompile.DiagnosticsFormat)" DisableLanguageExtensions="%(ClCompile.DisableLanguageExtensions)" DisableSpecificWarnings="%(ClCompile.DisableSpecificWarnings)" EnableASAN="%(ClCompile.EnableASAN)" EnableEnhancedInstructionSet="%(ClCompile.EnableEnhancedInstructionSet)" EnableFiberSafeOptimizations="%(ClCompile.EnableFiberSafeOptimizations)" EnableFuzzer="%(ClCompile.EnableFuzzer)" EnableModules="%(ClCompile.EnableModules)" EnableParallelCodeGeneration="%(ClCompile.EnableParallelCodeGeneration)" EnablePREfast="%(ClCompile.EnablePREfast)" EnforceTypeConversionRules="%(ClCompile.EnforceTypeConversionRules)" ErrorReporting="%(ClCompile.ErrorReporting)" ExceptionHandling="%(ClCompile.ExceptionHandling)" ExpandAttributedSource="%(ClCompile.ExpandAttributedSource)" ExternalDirectoriesEnv="%(ClCompile.ExternalDirectoriesEnv)" ExternalTemplatesDiagnostics="%(ClCompile.ExternalTemplatesDiagnostics)" ExternalWarningLevel="%(ClCompile.ExternalWarningLevel)" DisableAnalyzeExternal="%(ClCompile.DisableAnalyzeExternal)" AnalyzeExternalRuleset="%(ClCompile.AnalyzeExternalRuleset)" FavorSizeOrSpeed="%(ClCompile.FavorSizeOrSpeed)" FloatingPointExceptions="%(ClCompile.FloatingPointExceptions)" FloatingPointModel="%(ClCompile.FloatingPointModel)" ForceConformanceInForLoopScope="%(ClCompile.ForceConformanceInForLoopScope)" ForcedIncludeFiles="%(ClCompile.ForcedIncludeFiles)" ForcedUsingFiles="%(ClCompile.ForcedUsingFiles)" ForceSynchronousPDBWrites="%(ClCompile.ForceSynchronousPDBWrites)" FunctionLevelLinking="%(ClCompile.FunctionLevelLinking)" GenerateModuleDependencies="%(ClCompile.GenerateModuleDependencies)" GenerateSourceDependencies="%(ClCompile.GenerateSourceDependencies)" GenerateXMLDocumentationFiles="%(ClCompile.GenerateXMLDocumentationFiles)" GuardEHContMetadata="%(ClCompile.GuardEHContMetadata)" GuardSignedReturns="%(ClCompile.GuardSignedReturns)" IgnoreStandardIncludePath="%(ClCompile.IgnoreStandardIncludePath)" InlineFunctionExpansion="%(ClCompile.InlineFunctionExpansion)" IntelJCCErratum="%(ClCompile.IntelJCCErratum)" IntrinsicFunctions="%(ClCompile.IntrinsicFunctions)" LanguageStandard="%(ClCompile.LanguageStandard)" LanguageStandard_C="%(ClCompile.LanguageStandard_C)" MinimalRebuild="%(ClCompile.MinimalRebuild)" ModuleDependenciesFile="%(ClCompile.ModuleDependenciesFile)" ModuleOutputFile="%(ClCompile.ModuleOutputFile)" MultiProcessorCompilation="%(ClCompile.MultiProcessorCompilation)" ObjectFileName="%(ClCompile.ObjectFileName)" OmitDefaultLibName="%(ClCompile.OmitDefaultLibName)" OmitFramePointers="%(ClCompile.OmitFramePointers)" OpenMPSupport="%(ClCompile.OpenMPSupport)" Optimization="%(ClCompile.Optimization)" PrecompiledHeader="%(ClCompile.PrecompiledHeader)" PrecompiledHeaderFile="%(ClCompile.PrecompiledHeaderFile)" PrecompiledHeaderOutputFile="%(ClCompile.PrecompiledHeaderOutputFile)" PREfastAdditionalOptions="%(ClCompile.PREfastAdditionalOptions)" PREfastAdditionalPlugins="%(ClCompile.PREfastAdditionalPlugins)" PREfastLog="%(ClCompile.PREfastLog)" PREfastRulesetFile="%(ClCompile.PREfastRulesetFile)" PREfastProjectDirectory="%(ClCompile.PREfastProjectDirectory)" PREfastRulesetDirectories="%(ClCompile.PREfastRulesetDirectories)" PreprocessKeepComments="%(ClCompile.PreprocessKeepComments)" PreprocessorDefinitions="%(ClCompile.PreprocessorDefinitions)" PreprocessSuppressLineNumbers="%(ClCompile.PreprocessSuppressLineNumbers)" PreprocessToFile="%(ClCompile.PreprocessToFile)" ProcessorNumber="%(ClCompile.ProcessorNumber)" ProgramDataBaseFileName="%(ClCompile.ProgramDataBaseFileName)" RemoveUnreferencedCodeData="%(ClCompile.RemoveUnreferencedCodeData)" RuntimeLibrary="%(ClCompile.RuntimeLibrary)" RuntimeTypeInfo="%(ClCompile.RuntimeTypeInfo)" SDLCheck="%(ClCompile.SDLCheck)" ShowIncludes="%(ClCompile.ShowIncludes)" SourceDependenciesFile="%(ClCompile.SourceDependenciesFile)" WarningVersion="%(ClCompile.WarningVersion)" SmallerTypeCheck="%(ClCompile.SmallerTypeCheck)" SpectreMitigation="%(ClCompile.SpectreMitigation)" StdIfcDirectory="%(ClCompile.StdIfcDirectory)" StringPooling="%(ClCompile.StringPooling)" StructMemberAlignment="%(ClCompile.StructMemberAlignment)" SupportJustMyCode="%(ClCompile.SupportJustMyCode)" SuppressStartupBanner="%(ClCompile.SuppressStartupBanner)" TranslateIncludes="%(ClCompile.TranslateIncludes)" TreatAngleIncludeAsExternal="%(ClCompile.TreatAngleIncludeAsExternal)" TreatSpecificWarningsAsErrors="%(ClCompile.TreatSpecificWarningsAsErrors)" TreatWarningAsError="%(ClCompile.TreatWarningAsError)" TreatWChar_tAsBuiltInType="%(ClCompile.TreatWChar_tAsBuiltInType)" UndefineAllPreprocessorDefinitions="%(ClCompile.UndefineAllPreprocessorDefinitions)" UndefinePreprocessorDefinitions="%(ClCompile.UndefinePreprocessorDefinitions)" UseFullPaths="%(ClCompile.UseFullPaths)" UseStandardPreprocessor="%(ClCompile.UseStandardPreprocessor)" UseUnicodeForAssemblerListing="%(ClCompile.UseUnicodeForAssemblerListing)" WarningLevel="%(ClCompile.WarningLevel)" WholeProgramOptimization="%(ClCompile.WholeProgramOptimization)" WinRTNoStdLib="%(ClCompile.WinRTNoStdLib)" XMLDocumentationFileName="%(ClCompile.XMLDocumentationFileName)" CreateHotpatchableImage="%(CLCompile.CreateHotpatchableImage)" TrackerLogDirectory="%(ClCompile.TrackerLogDirectory)" ExcludedInputPaths="%(ClCompile.ExcludedInputPaths)" TLogReadFiles="@(CLTLogReadFiles)" TLogWriteFiles="@(CLTLogWriteFiles)" ToolExe="$(CLToolExe)" ToolPath="$(CLToolPath)" TrackFileAccess="$(TrackFileAccess)" MinimalRebuildFromTracking="%(ClCompile.MinimalRebuildFromTracking)" ToolArchitecture="$(CLToolArchitecture)" TrackerFrameworkPath="$(CLTrackerFrameworkPath)" TrackerSdkPath="$(CLTrackerSdkPath)" TrackedInputFilesToIgnore="@(ClNoDependencies)" TrackedOutputFilesToIgnore="@(ClTrackedOutputFilesToIgnore)" DeleteOutputBeforeExecute="%(ClCompile.DeleteOutputBeforeExecute)" AcceptableNonZeroExitCodes="%(ClCompile.AcceptableNonZeroExitCodes)" YieldDuringToolExecution="$(ClYieldDuringToolExecution)" EnableClServerMode="$(EnableClServerMode)" UseMsbuildResourceManager="$(UseMsbuildResourceManager)" IgnoreErrorsFromLog="$(IgnoreErrorsFromLog)" ErrorListRegex="@(CLErrorListRegex)" UseStructuredOutput="$(UseClStructuredOutput)" />
+		<StripPreprocessedSourceFile InputFilename="$(IntDir)%(ClCompile.FileName).i" OutputFilename="$(IntDir)%(ClCompile.FileName).i%(ClCompile.Extension)" />
+		<Delete Files="$(IntDir)%(ClCompile.FileName).i" TreatErrorsAsWarnings="true" />
+		<ItemGroup Condition="'@(PreprocessSourceFiles)' == ''">
+			<BackupClCompile Remove="@(BackupClCompile)" />
+		</ItemGroup>
+		<!-- restore backed up ClCompile item group -->
+		<ItemGroup Condition="'@(PreprocessSourceFiles)' != ''">
+			<ClCompile Remove="@(ClCompile)" /><!-- remove overridden contents -->
+			<ClCompile Include="@(BackupClCompile)" /><!-- restore from backup, before the actual ClCompile commences -->
+			<ClCompile>
+				<!-- yikes, this is crude ... technically we'll want to check if _we_ changed it to true and only then reset to false -->
+				<!-- make sure we no longer request preprocessing -->
+				<PreprocessToFile>false</PreprocessToFile>
+			</ClCompile>
+			<BackupClCompile Remove="@(BackupClCompile)" />
+			<PreprocessSourceFiles Remove="@(PreprocessSourceFiles)" />
+		</ItemGroup>
+		<Error Condition="'@(PreprocessSourceFiles)' != '' or '@(BackupClCompile)' != ''" Text="Failed to restore old (backed up) ClCompile item group" />
+		<Error Condition="@(ClCompile) != '' and '%(ClCompile.PreprocessToFile)' == 'true'" Text="There are still @(ClCompile->Count()) files marked to be preprocessed!" />
+	</Target>
+</Project>

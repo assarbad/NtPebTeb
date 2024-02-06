@@ -108,7 +108,7 @@ function testprj(name, lang, buildopts)
         {
             name .. ".c*",
             "ntnative.h",
-            "ntpebldr.h",
+            "ntpebldr.hpp",
             "compile-test.inl",
         }
 

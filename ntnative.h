@@ -37,6 +37,7 @@
 // http://undocumented.ntinternals.net
 // https://github.com/ntdiff/headers + https://ntdiff.github.io
 // https://www.vergiliusproject.com/
+// https://ntdoc.m417z.com/symbols
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __NTNATIVE_H_VER__
