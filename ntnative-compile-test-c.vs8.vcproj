@@ -357,7 +357,7 @@
 				>
 			</File>
 			<File
-				RelativePath="ntpebldr.h"
+				RelativePath="ntpebldr.hpp"
 				>
 			</File>
 		</Filter>
