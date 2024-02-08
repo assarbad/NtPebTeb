@@ -19,11 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{30EA5A91-DECB-C8C2-928B-1FE4220737DA}</ProjectGuid>
-    <RootNamespace>ntnative-compile-test-cxx20</RootNamespace>
+    <ProjectGuid>{4F0A7F21-E7D0-487F-5F6A-087A13510B60}</ProjectGuid>
+    <RootNamespace>ntnative-compile-test-cxx17-clang</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>ntnative-compile-test-cxx20</ProjectName>
+    <ProjectName>ntnative-compile-test-cxx17-clang</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -84,7 +84,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++20 /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /permissive- %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
@@ -97,7 +97,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++20 /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /permissive- %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
@@ -110,7 +110,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++20 /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /permissive- %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
@@ -123,7 +123,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++20 /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /permissive- %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
@@ -143,7 +143,7 @@
     <ClInclude Include="ntpebldr.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="compile-test-cxx20.cpp">
+    <ClCompile Include="compile-test-cxx17.cpp">
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

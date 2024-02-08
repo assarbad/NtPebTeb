@@ -19,11 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{793B2317-BE60-EF5C-FB4E-EA86F36DD05D}</ProjectGuid>
-    <RootNamespace>ntnative-compile-test-c</RootNamespace>
+    <ProjectGuid>{7D2DEB7E-CA61-A917-A56F-6AA0DEE59CC7}</ProjectGuid>
+    <RootNamespace>ntnative-compile-test-c-clang</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>ntnative-compile-test-c</ProjectName>
+    <ProjectName>ntnative-compile-test-c-clang</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

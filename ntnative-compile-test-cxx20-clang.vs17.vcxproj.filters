@@ -2,10 +2,10 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{2A058FE2-9FE4-EAF4-24B9-3BD0A3093501}</UniqueIdentifier>
+      <UniqueIdentifier>{24B98B30-91FF-9DFC-2199-801C3E6D7FE0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{8AEA1D74-8CA0-491A-FD5C-D23352A9456A}</UniqueIdentifier>
+      <UniqueIdentifier>{03F0328C-E813-8FA6-1193-7832738F94A3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -22,7 +22,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="compile-test-cxx17.cpp">
+    <ClCompile Include="compile-test-cxx20.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

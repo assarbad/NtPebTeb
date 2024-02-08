@@ -19,11 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{FF1E55B1-0257-49EB-8487-3AB48C51A8AD}</ProjectGuid>
-    <RootNamespace>Tests</RootNamespace>
+    <ProjectGuid>{3FB71B6A-7809-2269-8406-5E966DA4A074}</ProjectGuid>
+    <RootNamespace>ntnative-compile-test-cxx20-clang</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>Tests</ProjectName>
+    <ProjectName>ntnative-compile-test-cxx20-clang</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -84,12 +84,11 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googletest\include;$(ProjectDir)googlemock;$(ProjectDir)googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/std:c++20 /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googletest\include;$(ProjectDir)googlemock;$(ProjectDir)googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -98,12 +97,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googletest\include;$(ProjectDir)googlemock;$(ProjectDir)googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/std:c++20 /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googletest\include;$(ProjectDir)googlemock;$(ProjectDir)googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -112,12 +110,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googletest\include;$(ProjectDir)googlemock;$(ProjectDir)googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/std:c++20 /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googletest\include;$(ProjectDir)googlemock;$(ProjectDir)googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -126,12 +123,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googletest\include;$(ProjectDir)googlemock;$(ProjectDir)googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/std:c++20 /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)googlemock\include;$(ProjectDir)googletest\include;$(ProjectDir)googlemock;$(ProjectDir)googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,46 +139,15 @@
     <Import Project="$(ProjectDir)project.late.props" Condition="exists('$(ProjectDir)project.late.props') AND '$(SolutionDir)' != '$(ProjectDir)'" Label="Project-specific (local/late)" />
   </ImportGroup>
   <ItemGroup>
-    <ClInclude Include="googlemock\include\gmock\gmock-actions.h" />
-    <ClInclude Include="googlemock\include\gmock\gmock-cardinalities.h" />
-    <ClInclude Include="googlemock\include\gmock\gmock-function-mocker.h" />
-    <ClInclude Include="googlemock\include\gmock\gmock-matchers.h" />
-    <ClInclude Include="googlemock\include\gmock\gmock-more-actions.h" />
-    <ClInclude Include="googlemock\include\gmock\gmock-more-matchers.h" />
-    <ClInclude Include="googlemock\include\gmock\gmock-nice-strict.h" />
-    <ClInclude Include="googlemock\include\gmock\gmock-spec-builders.h" />
-    <ClInclude Include="googlemock\include\gmock\gmock.h" />
-    <ClInclude Include="googletest\include\gtest\gtest-assertion-result.h" />
-    <ClInclude Include="googletest\include\gtest\gtest-death-test.h" />
-    <ClInclude Include="googletest\include\gtest\gtest-matchers.h" />
-    <ClInclude Include="googletest\include\gtest\gtest-message.h" />
-    <ClInclude Include="googletest\include\gtest\gtest-param-test.h" />
-    <ClInclude Include="googletest\include\gtest\gtest-printers.h" />
-    <ClInclude Include="googletest\include\gtest\gtest-spi.h" />
-    <ClInclude Include="googletest\include\gtest\gtest-test-part.h" />
-    <ClInclude Include="googletest\include\gtest\gtest-typed-test.h" />
-    <ClInclude Include="googletest\include\gtest\gtest.h" />
-    <ClInclude Include="googletest\include\gtest\gtest_pred_impl.h" />
-    <ClInclude Include="googletest\include\gtest\gtest_prod.h" />
-    <ClInclude Include="googletest\src\gtest-internal-inl.h" />
+    <ClInclude Include="ntnative.h" />
+    <ClInclude Include="ntpebldr.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Crt.cpp">
+    <ClCompile Include="compile-test-cxx20.cpp">
     </ClCompile>
-    <ClCompile Include="kernelbase-reimpl.cpp">
-    </ClCompile>
-    <ClCompile Include="ntdll-reimpl.cpp">
-    </ClCompile>
-    <ClCompile Include="static_murmur3.cpp">
-    </ClCompile>
-    <ClCompile Include="Tests.cpp">
-    </ClCompile>
-    <ClCompile Include="underhanded.cpp">
-    </ClCompile>
-    <ClCompile Include="googlemock\src\gmock-all.cc">
-    </ClCompile>
-    <ClCompile Include="googletest\src\gtest-all.cc">
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="compile-test.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="PropertySheets">

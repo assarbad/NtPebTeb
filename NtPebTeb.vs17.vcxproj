@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9D0269DA-AB26-4548-9424-58418D848B24}</ProjectGuid>
+    <ProjectGuid>{BFCF4B33-2E67-8EEA-6C7A-6BE83864CF22}</ProjectGuid>
     <RootNamespace>NtPebTeb</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <Keyword>Win32Proj</Keyword>
@@ -145,11 +145,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="create_projects.cmd" />
     <None Include="README.md" />
     <None Include="premake4.lua" />
     <None Include="project.early.props" />
     <None Include="project.late.props" />
     <None Include="Directory.Build.targets" />
+    <None Include="PreprocessSourceFiles.targets" />
     <None Include=".editorconfig" />
     <None Include=".clang-format" />
     <None Include=".gitignore" />

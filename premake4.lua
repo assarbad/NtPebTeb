@@ -14,84 +14,9 @@
   ]]
 local action = _ACTION or ""
 
-    solution ("NtPebTeb")
-        configurations  {"Debug", "Release"}
-        platforms       {"x32", "x64"}
-        location        (".")
-
-        if action >= "vs2015" then
-            project ("NtPebTeb")
-                uuid            ("9D0269DA-AB26-4548-9424-58418D848B24")
-                language        ("C++")
-                kind            ("ConsoleApp")
-                flags           {"StaticRuntime", "Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
-                defines         {"WIN32", "_CONSOLE",}
-
-                files
-                {
-                    "NtPebTeb.cpp",
-                    "*.h",
-                    "*.hpp",
-                    "*.manifest",
-                    "*.cmd", "*.txt", "*.md", "*.rst", "premake4.lua",
-                    "*.manifest", "*.props", "*.targets", "*.ruleset", ".editorconfig", ".clang-format",
-                    ".gitignore", ".hgignore",
-                }
-
-                vpaths
-                {
-                    ["Special Files/*"] = { "**.cmd", "premake4.lua", "**.manifest", ".gitignore", ".hgignore" },
-                    ["Header Files/*"] = { "*.h", "*.hpp", },
-                    ["Source Files/*"] = { "*.cpp", },
-                }
-
-                configuration {"Debug"}
-                    defines         {"_DEBUG"}
-
-                configuration {"Release"}
-                    defines         {"NDEBUG"}
-                    flags           {"Optimize", "NoIncrementalLink", "NoEditAndContinue"}
-
-            project ("Tests")
-                uuid            ("FF1E55B1-0257-49EB-8487-3AB48C51A8AD")
-                language        ("C++")
-                kind            ("ConsoleApp")
-                flags           {"Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
-                location        ("Tests")
-                defines         {"_CONSOLE",}
-                includedirs     {"$(ProjectDir)googlemock\\include", "$(ProjectDir)googletest\\include", "$(ProjectDir)googlemock", "$(ProjectDir)googletest",}
-
-                files
-                {
-                    "Tests/*.cpp",
-                    "Tests/googlemock/include/gmock/*.h",
-                    "Tests/googletest/include/gtest/*.h",
-                    "Tests/googlemock/src/gmock-all.cc",
-                    "Tests/googletest/src/gtest-all.cc",
-                    "Tests/googletest/src/gtest-internal-inl.h",
-                }
-
-                vpaths
-                {
-                    ["Header Files/*"] = { "*.h" },
-                    ["Google/Mock/Header Files/*"] = { "Tests/googlemock/include/gmock/*" },
-                    ["Google/Test/Header Files/*"] = { "Tests/googletest/include/gtest/*" },
-                    ["Google/Mock/Source Files/*"] = { "Tests/googlemock/src/*" },
-                    ["Google/Test/Source Files/*"] = { "Tests/googletest/src/*" },
-                    ["Source Files/*"] = { "Tests/*.cpp" },
-                }
-
-                configuration {"Debug"}
-                    defines         {"_DEBUG"}
-
-                configuration {"Release"}
-                    defines         {"NDEBUG"}
-                    flags           {"Optimize", "NoIncrementalLink", "NoEditAndContinue"}
-        end
-
-function testprj(name, lang, buildopts)
-    project ("ntnative-" .. name)
-        uuid            (os.str2uuid("ntnative-" .. name))
+function testprj(name, suffix, lang, buildopts)
+    project ("ntnative-" .. name .. iif(suffix, suffix, ""))
+        uuid            (os.str2uuid("ntnative-" .. name .. iif(suffix, suffix, "")))
         language        (lang)
         kind            ("ConsoleApp")
         flags           {"StaticRuntime", "Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
@@ -126,20 +51,117 @@ function testprj(name, lang, buildopts)
             flags           {"Optimize", "NoIncrementalLink", "NoEditAndContinue"}
 end
 
-    testprj("compile-test-c", "C")
+function allprj(name, suffix)
+    if action >= "vs2015" then
+        project (name .. iif(suffix, suffix, ""))
+            uuid            (os.str2uuid(name .. iif(suffix, suffix, "") .. "9D0269DA-AB26-4548-9424-58418D848B24"))
+            language        ("C++")
+            kind            ("ConsoleApp")
+            flags           {"StaticRuntime", "Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
+            defines         {"WIN32", "_CONSOLE",}
+
+            files
+            {
+                "NtPebTeb.cpp",
+                "*.h",
+                "*.hpp",
+                "*.manifest",
+                "*.cmd", "*.txt", "*.md", "*.rst", "premake4.lua",
+                "*.manifest", "*.props", "*.targets", "*.ruleset", ".editorconfig", ".clang-format",
+                ".gitignore", ".hgignore",
+            }
+
+            vpaths
+            {
+                ["Special Files/*"] = { "**.cmd", "premake4.lua", "**.manifest", ".gitignore", ".hgignore" },
+                ["Header Files/*"] = { "*.h", "*.hpp", },
+                ["Source Files/*"] = { "*.cpp", },
+            }
+
+            configuration {"Debug"}
+                defines         {"_DEBUG"}
+
+            configuration {"Release"}
+                defines         {"NDEBUG"}
+                flags           {"Optimize", "NoIncrementalLink", "NoEditAndContinue"}
+
+        project ("Tests" .. iif(suffix, suffix, ""))
+            uuid            (os.str2uuid("Tests" .. iif(suffix, suffix, "") .. "FF1E55B1-0257-49EB-8487-3AB48C51A8AD"))
+            language        ("C++")
+            kind            ("ConsoleApp")
+            flags           {"Unicode", "WinMain", "NoPCH", "NoMinimalRebuild", "Symbols",}
+            location        ("Tests")
+            defines         {"_CONSOLE",}
+            includedirs     {"$(ProjectDir)googlemock\\include", "$(ProjectDir)googletest\\include", "$(ProjectDir)googlemock", "$(ProjectDir)googletest",}
+
+            files
+            {
+                "Tests/*.cpp",
+                "Tests/googlemock/include/gmock/*.h",
+                "Tests/googletest/include/gtest/*.h",
+                "Tests/googlemock/src/gmock-all.cc",
+                "Tests/googletest/src/gtest-all.cc",
+                "Tests/googletest/src/gtest-internal-inl.h",
+            }
+
+            vpaths
+            {
+                ["Header Files/*"] = { "*.h" },
+                ["Google/Mock/Header Files/*"] = { "Tests/googlemock/include/gmock/*" },
+                ["Google/Test/Header Files/*"] = { "Tests/googletest/include/gtest/*" },
+                ["Google/Mock/Source Files/*"] = { "Tests/googlemock/src/*" },
+                ["Google/Test/Source Files/*"] = { "Tests/googletest/src/*" },
+                ["Source Files/*"] = { "Tests/*.cpp" },
+            }
+
+            configuration {"Debug"}
+                defines         {"_DEBUG"}
+
+            configuration {"Release"}
+                defines         {"NDEBUG"}
+                flags           {"Optimize", "NoIncrementalLink", "NoEditAndContinue"}
+    end
+
+    testprj("compile-test-c", suffix, "C")
     if action < "vs2010" then
-        testprj("compile-test-cxx", "C++")
+        testprj("compile-test-cxx", suffix, "C++")
     end
     if action >= "vs2015" then
-        -- testprj("compile-test-cxx11", "C++" )
-        testprj("compile-test-cxx14", "C++", { "/std:c++14", "/permissive-", })
+        -- testprj("compile-test-cxx11", suffix, "C++" )
+        testprj("compile-test-cxx14", suffix, "C++", { "/std:c++14", "/permissive-", })
     end
     if action >= "vs2017" then
-        testprj("compile-test-cxx17", "C++", { "/std:c++17", "/permissive-", })
+        testprj("compile-test-cxx17", suffix, "C++", { "/std:c++17", "/permissive-", })
     end
     if action >= "vs2022" then
-        testprj("compile-test-cxx20", "C++", { "/std:c++20", "/permissive-", })
+        testprj("compile-test-cxx20", suffix, "C++", { "/std:c++20", "/permissive-", })
     end
+end
+
+function create_all()
+    local name = "NtPebTeb"
+    solution (name .. iif(_OPTIONS["clang"] ~= nil, "-clang", ""))
+        configurations  {"Debug", "Release"}
+        platforms       {"x32", "x64"}
+        location        (".")
+
+        if _OPTIONS["clang"] ~= nil then
+            allprj(name, "-clang")
+        else
+            allprj(name)
+        end
+
+    if (action >= "vs2019") and (not _OPTIONS["clang"]) then
+        solution ("NtPebTeb-combined")
+            configurations  {"Debug", "Release"}
+            platforms       {"x32", "x64"}
+            location        (".")
+
+            allprj(name)
+            printf("Repeating projects, this time for Clang: " .. action)
+            allprj(name, "-clang")
+    end
+end
 
 do
     -- Some tags we suppress as we override those from the project.props file
@@ -314,9 +336,9 @@ do
         if _ACTION then
             name_map = {vs2005 = "vs8", vs2008 = "vs9", vs2010 = "vs10", vs2012 = "vs11", vs2013 = "vs12", vs2015 = "vs14", vs2017 = "vs15", vs2019 = "vs16", vs2022 = "vs17"}
             if name_map[_ACTION] then
-                pattern = pattern:gsub("%%%%", "%%%%." .. name_map[_ACTION] .. iif(_OPTIONS["clang"] ~= nil, "clang", ""))
+                pattern = pattern:gsub("%%%%", "%%%%." .. name_map[_ACTION])
             else
-                pattern = pattern:gsub("%%%%", "%%%%." .. _ACTION .. iif(_OPTIONS["clang"] ~= nil, "clang", ""))
+                pattern = pattern:gsub("%%%%", "%%%%." .. _ACTION)
             end
         end
         return orig_getbasename(prjname, pattern)
@@ -359,14 +381,14 @@ do
                         return
                     end
                     if msg == "<PlatformToolset>%s</PlatformToolset>" then
-                        if (_OPTIONS["clang"] ~= nil) and (_ACTION == "vs2017") then
+                        if (prj.name:match("^.+-clang$")) and (_ACTION == "vs2017") then
                             if _OPTIONS["xp"] ~= nil then
                                 print "WARNING: The --clang option takes precedence over --xp, therefore picking v141_clang_c2 toolset."
                             end
                             print "WARNING: If you are used to Clang support from VS2019 and newer, be sure to review your choice. It's not the same on older VS versions."
                             orig_p(indent, msg, "v141_clang_c2")
                             return
-                        elseif (_OPTIONS["clang"] ~= nil) and (_ACTION >= "vs2019") then
+                        elseif (prj.name:match("^.+-clang$")) and (_ACTION >= "vs2019") then
                             if _OPTIONS["xp"] ~= nil then
                                 print "WARNING: The --clang option takes precedence over --xp, therefore picking ClangCL toolset."
                             end
@@ -485,3 +507,5 @@ do
         remove_action(k)
     end
 end
+
+create_all()

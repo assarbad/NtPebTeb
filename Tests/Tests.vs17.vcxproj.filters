@@ -2,28 +2,28 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{83155746-F4A0-04A9-8796-6C2645DA59FB}</UniqueIdentifier>
+      <UniqueIdentifier>{F846D431-E735-CDC1-56C6-25BB5BA77C03}</UniqueIdentifier>
     </Filter>
     <Filter Include="Google">
-      <UniqueIdentifier>{3AC720FC-93ED-D8CA-C935-766FEF038ED6}</UniqueIdentifier>
+      <UniqueIdentifier>{2B254936-F119-1309-9DE1-D0AB3B322C17}</UniqueIdentifier>
     </Filter>
     <Filter Include="Google\Mock">
-      <UniqueIdentifier>{21B88884-E3B7-702E-13F3-1F8B078BBCB2}</UniqueIdentifier>
+      <UniqueIdentifier>{8A28C641-4EEC-E967-42F1-A6CC5D638784}</UniqueIdentifier>
     </Filter>
     <Filter Include="Google\Mock\Header Files">
-      <UniqueIdentifier>{75931F6D-EFAC-4883-DA37-85564F25253B}</UniqueIdentifier>
+      <UniqueIdentifier>{44D8C0DC-BFB7-5254-A321-E12197EA962C}</UniqueIdentifier>
     </Filter>
     <Filter Include="Google\Test">
-      <UniqueIdentifier>{ED14519A-FB1C-661E-AD4B-E18542032EDF}</UniqueIdentifier>
+      <UniqueIdentifier>{625941B7-EC21-9000-A5B7-3E177E129E46}</UniqueIdentifier>
     </Filter>
     <Filter Include="Google\Test\Header Files">
-      <UniqueIdentifier>{96EE7890-EE52-628B-97B9-B8D12B2C9218}</UniqueIdentifier>
+      <UniqueIdentifier>{902AB86F-D07D-D6D9-FCF2-05682CF76803}</UniqueIdentifier>
     </Filter>
     <Filter Include="Google\Mock\Source Files">
-      <UniqueIdentifier>{A9B9CC69-3E97-53AD-2F4D-2D351BF76BDA}</UniqueIdentifier>
+      <UniqueIdentifier>{41412E50-161A-AFCE-140B-09B9A731018C}</UniqueIdentifier>
     </Filter>
     <Filter Include="Google\Test\Source Files">
-      <UniqueIdentifier>{9B60E208-361C-2E90-BB05-2B3B6938138E}</UniqueIdentifier>
+      <UniqueIdentifier>{E1443336-0747-BBBE-B921-84BDEF7DC3C7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
