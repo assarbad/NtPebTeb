@@ -136,10 +136,10 @@ namespace NT
     namespace
     { // NB: these are intentionally defined in terms of C++ types rather than "Windows" types
         // Modern C++: wchar_t const (&SystemRoot)[260] = (decltype(SystemRoot))(*(wchar_t*)(MM_SHARED_USER_DATA_VA + 0x30));
-        wchar_t const (&SystemRoot)[260] = (wchar_t const (&)[260])(*(wchar_t*)(MM_SHARED_USER_DATA_VA + 0x30));
+        wchar_t const (&SystemRoot)[260] = (wchar_t const (&)[260])(*(wchar_t*)(MM_SHARED_USER_DATA_VA + 0x30)); //-V542
         unsigned short const& NativeProcessorArchitecture = *((unsigned short*)(MM_SHARED_USER_DATA_VA + 0x026a));
-        unsigned long const& MajorVersion = *((unsigned long*)(MM_SHARED_USER_DATA_VA + 0x026c));
-        unsigned long const& MinorVersion = *((unsigned long*)(MM_SHARED_USER_DATA_VA + 0x0270));
+        unsigned long const& MajorVersion = *((unsigned long*)(MM_SHARED_USER_DATA_VA + 0x026c)); //-V206 //-V126
+        unsigned long const& MinorVersion = *((unsigned long*)(MM_SHARED_USER_DATA_VA + 0x0270)); //-V206 //-V126
     } // namespace
 #    endif
 #endif // !__NTNATIVE_H_VER__
@@ -151,8 +151,8 @@ namespace NT
         LIST_ENTRY InLoadOrderModuleList;
         LIST_ENTRY InMemoryOrderModuleList;
         LIST_ENTRY InInitializationOrderModuleList;
-        PVOID DllBase;
-        PVOID EntryPoint;
+        PVOID DllBase; //-V122
+        PVOID EntryPoint; //-V122
         ULONG SizeOfImage;
         UNICODE_STRING FullDllName;
         UNICODE_STRING BaseDllName;
@@ -161,15 +161,15 @@ namespace NT
         USHORT TlsIndex;
         LIST_ENTRY HashLinks;
         ULONG TimeDateStamp;
-        PVOID EntryPointActivationContext;
-        PVOID Lock;
+        PVOID EntryPointActivationContext; //-V122
+        PVOID Lock; //-V122
     } LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
     static_assert(offsetof(LDR_DATA_TABLE_ENTRY, DllBase) == 3 * sizeof(LIST_ENTRY), "DllBase offset has unexpected value");
 
     typedef struct
     { //-V802
-        PVOID DllBase;
-        PVOID EntryPoint;
+        PVOID DllBase; //-V122
+        PVOID EntryPoint; //-V122
         ULONG SizeOfImage;
         UNICODE_STRING FullDllName;
         UNICODE_STRING BaseDllName;
@@ -188,8 +188,8 @@ namespace NT
                 LDR_DATA_TABLE_ENTRY_CTX context;
                 struct
                 {
-                    PVOID DllBase;
-                    PVOID EntryPoint;
+                    PVOID DllBase; //-V122
+                    PVOID EntryPoint; //-V122
                     ULONG SizeOfImage;
                     UNICODE_STRING FullDllName;
                     UNICODE_STRING BaseDllName;
@@ -198,8 +198,8 @@ namespace NT
                     USHORT TlsIndex;
                     LIST_ENTRY HashLinks;
                     ULONG TimeDateStamp;
-                    PVOID EntryPointActivationContext;
-                    PVOID Lock;
+                    PVOID EntryPointActivationContext; //-V122
+                    PVOID Lock; //-V122
                 } real;
             } tail;
         } LDR_DATA_TABLE_ENTRY;
@@ -213,13 +213,13 @@ namespace NT
     { //-V802
         ULONG Length;
         BOOLEAN Initialized;
-        HANDLE SsHandle;
+        HANDLE SsHandle; //-V122
         LIST_ENTRY InLoadOrderModuleList;
         LIST_ENTRY InMemoryOrderModuleList;
         LIST_ENTRY InInitializationOrderModuleList;
-        PVOID EntryInProgress;
+        PVOID EntryInProgress; //-V122
         BOOLEAN ShutdownInProgress;
-        HANDLE ShutdownThreadId;
+        HANDLE ShutdownThreadId; //-V122
     } PEB_LDR_DATA, *PPEB_LDR_DATA;
 
 #pragma warning(push)
@@ -244,25 +244,25 @@ namespace NT
                 BOOLEAN IsLongPathAwareProcess : 1; // xref: https://stackoverflow.com/a/57091811
             };
         };
-        HANDLE Mutant;
-        PVOID ImageBaseAddress;
-        PPEB_LDR_DATA Ldr;
-        PRTL_USER_PROCESS_PARAMETERS ProcessParameters;
-        PVOID SubSystemData;
-        PVOID ProcessHeap;
-        PRTL_CRITICAL_SECTION FastPebLock;
-        PSLIST_HEADER AtlThunkSListPtr;
+        HANDLE Mutant; //-V122
+        PVOID ImageBaseAddress; //-V122
+        PPEB_LDR_DATA Ldr; //-V122
+        PRTL_USER_PROCESS_PARAMETERS ProcessParameters; //-V122
+        PVOID SubSystemData; //-V122
+        PVOID ProcessHeap; //-V122
+        PRTL_CRITICAL_SECTION FastPebLock; //-V122
+        PSLIST_HEADER AtlThunkSListPtr; //-V122
         // Everything from here down has been copied from winternl.h for now
-        PVOID Reserved5;
+        PVOID Reserved5; //-V122
         ULONG Reserved6;
-        PVOID Reserved7;
+        PVOID Reserved7; //-V122
         ULONG Reserved8;
         ULONG AtlThunkSListPtr32;
-        PVOID Reserved9[45];
+        PVOID Reserved9[45]; //-V122
         BYTE Reserved10[96];
-        PPS_POST_PROCESS_INIT_ROUTINE PostProcessInitRoutine;
+        PPS_POST_PROCESS_INIT_ROUTINE PostProcessInitRoutine; //-V122
         BYTE Reserved11[128];
-        PVOID Reserved12[1];
+        PVOID Reserved12[1]; //-V122
         ULONG SessionId;
     } PEB, *PPEB;
 #pragma warning(pop)
@@ -271,26 +271,26 @@ namespace NT
     typedef struct _TEB // xref: http://terminus.rewolf.pl/terminus/structures/ntdll/_TEB_combined.html
     {
         NT_TIB NtTib;
-        PVOID EnvironmentPointer;
+        PVOID EnvironmentPointer; //-V122
         struct
         {
-            HANDLE UniqueProcess;
-            HANDLE UniqueThread;
+            HANDLE UniqueProcess; //-V122
+            HANDLE UniqueThread; //-V122
         } ClientId;
-        PVOID ActiveRpcHandle;
-        PVOID ThreadLocalStoragePointer;
-        struct NT::_PEB* ProcessEnvironmentBlock;
+        PVOID ActiveRpcHandle; //-V122
+        PVOID ThreadLocalStoragePointer; //-V122
+        struct NT::_PEB* ProcessEnvironmentBlock; //-V122
         ULONG LastErrorValue;
         ULONG CountOfOwnedCriticalSections;
-        PVOID CsrClientThread;
-        PVOID Win32ThreadInfo;
+        PVOID CsrClientThread; //-V122
+        PVOID Win32ThreadInfo; //-V122
         ULONG User32Reserved[26];
         ULONG UserReserved[5];
-        PVOID WOW32Reserved;
+        PVOID WOW32Reserved; //-V122
         LCID CurrentLocale;
         ULONG FpSoftwareStatusRegister;
-        PVOID ReservedForDebuggerInstrumentation[16];
-        PVOID SystemReserved1[38];
+        PVOID ReservedForDebuggerInstrumentation[16]; //-V122
+        PVOID SystemReserved1[38]; //-V122
         NTSTATUS ExceptionCode;
 #    ifdef _M_X64
         ULONG UnknownAndDontCare[0x55D];
@@ -341,9 +341,9 @@ namespace NT
         STATIC_INLINE TEB* NtCurrentTeb()
         {
 #if defined(_WIN64) && defined(_M_X64)
-            return (TEB*)__readgsqword(FIELD_OFFSET(NT_TIB, Self));
+            return (TEB*)__readgsqword(FIELD_OFFSET(NT_TIB, Self)); //-V202
 #    ifdef _MSVC_LANG
-            static_assert(FIELD_OFFSET(NT_TIB, Self) == 0x30, "Something is wrong with the NT_TIB struct");
+            static_assert(FIELD_OFFSET(NT_TIB, Self) == 0x30, "Something is wrong with the NT_TIB struct"); //-V202
 #    endif // _MSVC_LANG
 #elif defined(_WIN32) && defined(_M_IX86)
             return (TEB*)__readfsdword(FIELD_OFFSET(NT_TIB, Self));
@@ -459,25 +459,25 @@ namespace NT
             STATIC_INLINE WCHAR towlower_(WCHAR ch)
             {
                 if ((L'A' <= ch) && (ch <= L'Z'))
-                    ch += 0x20;
+                    ch += 0x20; //-V112
                 return ch;
             }
             STATIC_INLINE WCHAR towupper_(WCHAR ch)
             {
                 if ((L'a' <= ch) && (ch <= L'z'))
-                    ch -= 0x20;
+                    ch -= 0x20; //-V112
                 return ch;
             }
             STATIC_INLINE CHAR tolower_(CHAR ch)
             {
                 if (('A' <= ch) && (ch <= 'Z'))
-                    ch += 0x20;
+                    ch += 0x20; //-V112
                 return ch;
             }
             STATIC_INLINE CHAR toupper_(CHAR ch)
             {
                 if (('a' <= ch) && (ch <= 'z'))
-                    ch -= 0x20;
+                    ch -= 0x20; //-V112
                 return ch;
             }
 #else
@@ -529,13 +529,13 @@ namespace NT
                 using CHARTYPE = strchar_t<STRTYPE>;
                 CHARTYPE* str1 = String1.Buffer;
                 CHARTYPE* str2 = String2.Buffer;
-                LONG const len1 = String1.Length / sizeof(CHARTYPE);
-                LONG const len2 = String2.Length / sizeof(CHARTYPE);
-                LONG const minlen = (len1 <= len2) ? len1 : len2;
+                size_t const len1 = String1.Length / sizeof(CHARTYPE);
+                size_t const len2 = String2.Length / sizeof(CHARTYPE);
+                size_t const minlen = (len1 <= len2) ? len1 : len2;
 
                 if (CaseInSensitive)
                 {
-                    for (LONG idx = 0; idx < minlen; idx++)
+                    for (size_t idx = 0; idx < minlen; idx++)
                     {
                         if (str1[idx] != str2[idx])
                         {
@@ -550,7 +550,7 @@ namespace NT
                 }
                 else
                 {
-                    for (LONG idx = 0; idx < minlen; idx++)
+                    for (size_t idx = 0; idx < minlen; idx++)
                     {
                         if (str1[idx] != str2[idx])
                         {
@@ -558,7 +558,7 @@ namespace NT
                         }
                     }
                 }
-                return len1 - len2;
+                return (LONG)(len1 - len2); //-V202
             }
         } // namespace crt
 
@@ -893,8 +893,8 @@ namespace NT
             {
                 ULONG IndexToBeIncremented; // incremented inside the callback
                 ULONG IndexToLookFor;
-                PVOID DllBase;
-                LDR_DATA_TABLE_ENTRY const* LdrDataTableEntry;
+                PVOID DllBase; //-V122
+                LDR_DATA_TABLE_ENTRY const* LdrDataTableEntry; //-V122
             } MapByOrder;
 
             STATIC_INLINE NTSTATUS CALLBACK MapOrderPredicate(LDR_DATA_TABLE_ENTRY_CTX const& ldrctx,
@@ -939,9 +939,9 @@ namespace NT
             typedef struct _MapByTrait
             { //-V802
                 NTSTATUS Status;
-                PVOID Address;
-                PVOID DllBase;
-                LDR_DATA_TABLE_ENTRY const* LdrDataTableEntry;
+                PVOID Address; //-V122
+                PVOID DllBase; //-V122
+                LDR_DATA_TABLE_ENTRY const* LdrDataTableEntry; //-V122
                 ULONG SizeOfImage;
             } MapByTrait;
 
@@ -968,7 +968,7 @@ namespace NT
                         }
                         auto const* needle = (byte*)data.Address;
                         auto const* haystack_start = (byte*)ldrctx.DllBase;
-                        auto const* haystack_end = haystack_start + ldrctx.SizeOfImage;
+                        auto const* haystack_end = haystack_start + ldrctx.SizeOfImage; //-V104
                         if ((needle >= haystack_start) && (needle <= haystack_end))
                         {
                             data.DllBase = ldrctx.DllBase;
@@ -1026,7 +1026,7 @@ namespace NT
         {
             typedef struct _MapByUnicodeString
             {
-                HMODULE hMod = nullptr;
+                HMODULE hMod = nullptr; //-V122
                 UNICODE_STRING const& usMod; // could be name or path
             } MapByUnicodeString;
 
@@ -1156,13 +1156,13 @@ namespace NT
                 return nullptr;
             }
             byte const* mod = (byte*)modtraits.DllBase;
-            byte const* const beyond = mod + modtraits.SizeOfImage;
+            byte const* const beyond = mod + modtraits.SizeOfImage; //-V104
             auto const* doshdr = checked_cast<IMAGE_DOS_HEADER>(mod, beyond);
             if (!doshdr || (IMAGE_DOS_SIGNATURE != doshdr->e_magic))
             {
                 return nullptr;
             }
-            auto const* nthdrs = checked_cast<IMAGE_NT_HEADERS64>(mod + doshdr->e_lfanew, beyond);
+            auto const* nthdrs = checked_cast<IMAGE_NT_HEADERS64>(mod + doshdr->e_lfanew, beyond); //-V104
             if (!nthdrs || (IMAGE_NT_SIGNATURE != nthdrs->Signature))
             {
                 return nullptr;
@@ -1305,9 +1305,9 @@ namespace NT
         if (expdatadir.Size && expdatadir.VirtualAddress)
         {
             auto const* const mod = (byte*)traits.DllBase;
-            auto const* const modend = mod + traits.SizeOfImage;
-            auto const* expdir = checked_cast<IMAGE_EXPORT_DIRECTORY>(&mod[expdatadir.VirtualAddress], modend);
-            if (expdir && checked_cast((byte*)expdir, modend, expdatadir.Size))
+            auto const* const modend = mod + traits.SizeOfImage; //-V104
+            auto const* expdir = checked_cast<IMAGE_EXPORT_DIRECTORY>(&mod[expdatadir.VirtualAddress], modend); //-V108
+            if (expdir && checked_cast((byte*)expdir, modend, expdatadir.Size)) //-V106
             {
                 return expdir;
             }
@@ -1326,10 +1326,10 @@ namespace NT
 
         auto const* const mod = (byte*)hMod;
         // RVAs to the names of named exports
-        auto const* const rvaNames = (ULONG*)&mod[expdir->AddressOfNames];
+        auto const* const rvaNames = (ULONG*)&mod[expdir->AddressOfNames]; //-V108 //-V206
         // Parallel to the above, contains the index into AddressOfFunctions
-        auto const* const rvaNameOrdinals = (USHORT*)&mod[expdir->AddressOfNameOrdinals];
-        auto const* const rvaFunctions = (ULONG*)&mod[expdir->AddressOfFunctions];
+        auto const* const rvaNameOrdinals = (USHORT*)&mod[expdir->AddressOfNameOrdinals]; //-V108
+        auto const* const rvaFunctions = (ULONG*)&mod[expdir->AddressOfFunctions]; //-V108 //-V206
 #if 0
         char const* const modName = (char*)&mod[expdir->Name];
         _tprintf(_T("[%hs] Base: 0x%08X; version: %u.%u\n"),
@@ -1341,7 +1341,7 @@ namespace NT
 
         if (IS_INTRESOURCE(FuncName))
         {
-            USHORT const idx = USHORT((ULONG_PTR)FuncName - expdir->Base);
+            USHORT const idx = USHORT((ULONG_PTR)FuncName - expdir->Base); //-V104
             if (idx < expdir->NumberOfFunctions)
             {
 #if 0
@@ -1351,15 +1351,15 @@ namespace NT
                             ExpFuncName,
                             rvaFunctions[idx);
 #endif
-                return (FARPROC)(rvaFunctions[idx] + mod);
+                return (FARPROC)(rvaFunctions[idx] + mod); //-V104 //-V206
             }
         }
         else
         {
             size_t const FuncNameLen = ntdll::crt::strlen_(FuncName);
-            for (size_t idx = 0; idx < expdir->NumberOfNames; idx++)
+            for (size_t idx = 0; idx < expdir->NumberOfNames; idx++) //-V104
             {
-                char const* const ExpFuncName = (char*)mod + rvaNames[idx];
+                char const* const ExpFuncName = (char*)mod + rvaNames[idx]; //-V104
                 if (0 == ntdll::crt::strncmp_(FuncName, ExpFuncName, FuncNameLen))
                 {
                     auto const addridx = rvaNameOrdinals[idx];
@@ -1369,7 +1369,7 @@ namespace NT
                              ExpFuncName,
                              rvaFunctions[addridx]);
 #endif
-                    return (FARPROC)(rvaFunctions[addridx] + mod);
+                    return (FARPROC)(rvaFunctions[addridx] + mod); //-V104 //-V206
                 }
             }
         }
